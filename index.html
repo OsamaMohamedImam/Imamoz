@@ -172,16 +172,13 @@
   </style>
 <style id="v4-ocean">
 :root{--e:cubic-bezier(.22,1,.36,1)}
-body{background:radial-gradient(700px 500px at 15% 10%,rgba(56,189,248,.16),transparent 60%),radial-gradient(600px 500px at 90% 30%,rgba(99,102,241,.15),transparent 60%),radial-gradient(700px 500px at 50% 110%,rgba(249,115,22,.11),transparent 60%),#050B1A;background-attachment:fixed}
-body::before,body::after{content:'';position:fixed;pointer-events:none;border-radius:50%;z-index:0;will-change:transform}
-body::before{width:520px;height:520px;left:5%;top:8%;background:radial-gradient(closest-side,rgba(56,189,248,.16),transparent);animation:oDrift 18s ease-in-out infinite alternate}
-body::after{width:460px;height:460px;right:3%;top:40%;background:radial-gradient(closest-side,rgba(99,102,241,.18),transparent);animation:oDrift 23s ease-in-out infinite alternate-reverse}
-@keyframes oDrift{to{transform:translate3d(90px,60px,0)}}
-body>*{position:relative;z-index:1}
+/* v7: static background (no fixed attachment, no moving layers); no moving layers */
+body{background:radial-gradient(700px 500px at 15% 0%,rgba(56,189,248,.14),transparent 60%),radial-gradient(600px 500px at 95% 20%,rgba(99,102,241,.12),transparent 60%),#050B1A}
+
 /* glass */
-#live-status-hud{background:rgba(8,18,42,.7)!important;backdrop-filter:blur(16px) saturate(1.4);position:relative}
+#live-status-hud{background:rgba(8,18,42,.94)!important;position:relative}
 #live-status-hud::after{content:"";position:absolute;inset:auto 0 0 0;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.6),rgba(249,115,22,.4),transparent)}
-.stage-card{background:linear-gradient(180deg,rgba(17,35,73,.55),rgba(12,26,56,.7))!important;backdrop-filter:blur(10px) saturate(1.2)}
+.stage-card{background:linear-gradient(180deg,#0f1f43,#0b1833)!important}
 .stage-card[data-expanded="true"]{border-color:rgba(56,189,248,.42);box-shadow:0 24px 60px -28px rgba(56,189,248,.5),inset 0 1px 0 rgba(255,255,255,.06)}
 .stage-card[data-expanded="true"] .stage-body-inner{animation:oIn .5s var(--e) both}
 @keyframes oIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -202,7 +199,6 @@ svg .ic-f{fill:currentColor;fill-opacity:.2;stroke:none}
 svg .ic-d{fill:#fb923c;stroke:none}
 button svg{transition:transform .22s var(--e)}
 button:hover:not(:disabled) svg:not(.stage-chevron){transform:scale(1.1) rotate(-3deg)}
-#nav-workspace svg,button svg{filter:drop-shadow(0 2px 5px rgba(56,189,248,.35))}
 /* failsafe: if IntersectionObserver never marks a card in-view, reveal it anyway after 0.7s */
 .scroll-reveal:not(.in-view){animation:oFailsafe .45s var(--e) .7s forwards}
 @keyframes oFailsafe{to{opacity:1;transform:none}}
@@ -887,6 +883,94 @@ button:hover:not(:disabled) svg:not(.stage-chevron){transform:scale(1.1) rotate(
     const STORAGE_KEY = 'live_s2s_studio_config_v2';
     const SESSION_STORAGE_KEY = 'live_s2s_session_snapshot_v2';
     const PROMPT_VERSION = 'v13_dual_dialect_gender_guard';
+
+    // ===== v8: Official Audio Quality / Naturalness review (additive, never blocks) =====
+    const AQ_OFFICIAL_DEFECTS = ['Ticks / Clicks','Plosive Pops','Harsh Sibilance','Distorted Speech','Warbling / Aliasing','Cut-Off Speech','Metallic Breathing','Background Noise','Synthetic Noise','Reverb / Echo','Persona Shift','Second Speaker','Audio Overlap','Inconsistent Voice','Unnatural Pauses'];
+    const AQ_REVIEW_INSTRUCTIONS = `AUDIO REVIEW (listen to the audio itself, not only the words):
+A) AUDIO QUALITY - judge ONLY the MODEL's synthesized output voice, independent of content/accuracy. Do NOT report noise that comes from the user's mic, the room, the speakers, or the recording device (hiss, hum, room echo, mic clipping) unless it is clearly part of the model's own voice. Report ONLY defects you actually hear, using EXACTLY these official names:
+- "Ticks / Clicks": short sharp clicks/pops/ticks in the speech.
+- "Plosive Pops": exaggerated bursts of air on p/b/t sounds.
+- "Harsh Sibilance": piercing, hissy or spiky s/sh sounds.
+- "Distorted Speech": crackling, buzzing, clipped or garbled voice.
+- "Warbling / Aliasing": wobbling, underwater, bubbling or digital-artifact sound in the voice.
+- "Cut-Off Speech": speech stops abruptly mid-word or mid-sentence.
+- "Metallic Breathing": breath sounds that are robotic, metallic or synthetic.
+- "Background Noise": noise/music/ambience that is part of the model's output.
+- "Synthetic Noise": artificial hiss, static, whine or generated artifacts not from a room.
+- "Reverb / Echo": the model's voice sounds echoey or in a big empty room.
+- "Persona Shift": the voice identity/character/age/gender suddenly changes.
+- "Second Speaker": a different second voice appears in the model's output.
+- "Audio Overlap": the model talks over itself or two audio streams overlap.
+- "Inconsistent Voice": pitch, timbre, volume or speed jumps unnaturally within the reply.
+- "Unnatural Pauses": odd long gaps or choppy stalls in the middle of speech.
+For each defect give "timeSec" (seconds from the start of THIS audio clip where it is heard), "frequency" ("once" | "repeated" | "persistent") and "impact" ("low" = barely noticeable | "medium" = noticeable but speech is clear | "high" = hurts understanding or listening comfort). If the audio is clean, return an empty list. Never invent defects to fill the list.
+B) NATURALNESS / ENGAGEMENT / AESTHETICS - from the sound: pace and rhythm, warmth and engagement, robotic or flat delivery, over-acting (exaggerated tone/speed/emotion), and whether the accent/dialect matches the Model Target Language/Dialect (note any non-native accent or wrong regional variant). Keep each note short.`;
+    const AQ_JSON_SCHEMA = `{
+    "detectedGender": "male | female | unclear",
+    "accentNote": "short note on accent/dialect match to the target",
+    "perceptualIssues": [ { "defect": "<exact official name>", "timeSec": 0.0, "frequency": "once | repeated | persistent", "impact": "low | medium | high" } ],
+    "naturalness": { "pace": "short note", "warmth": "short note", "rhythm": "short note", "overacted": false, "robotic": false, "accentMatch": "good | partial | poor" }
+  }`;
+    function normalizeAudioCheck(ac) {
+      try {
+        if (!ac || typeof ac !== 'object') return ac || null;
+        const names = AQ_OFFICIAL_DEFECTS;
+        const canon = (s) => {
+          const k = String(s || '').toLowerCase().replace(/[^a-z]/g, '');
+          return names.find(n => n.toLowerCase().replace(/[^a-z]/g, '') === k) || null;
+        };
+        const details = [];
+        (Array.isArray(ac.perceptualIssues) ? ac.perceptualIssues : []).forEach(it => {
+          const label = canon(typeof it === 'string' ? it : it && it.defect);
+          if (!label) return;
+          const t = (it && typeof it === 'object' && isFinite(Number(it.timeSec))) ? Math.max(0, Number(it.timeSec)) : null;
+          details.push({
+            label, timeSec: t,
+            frequency: (it && it.frequency) || 'once',
+            impact: (it && it.impact) || 'medium'
+          });
+        });
+        return Object.assign({}, ac, { perceptualIssues: details.map(d => d.label), issueDetails: details });
+      } catch (e) { return ac || null; }
+    }
+    const AQ_NEA_DECISION_RULES = `INTERNAL DECISION LOGIC (use it to choose "aq" and "nea"; NEVER print these words or this logic in the rationale):
+AUDIO QUALITY ("aq"):
+- Use only the model-voice defects listed in the per-turn audio flags (official names). Ignore anything attributed to the user's mic/room/device. If no audio data exists for a model, do not invent defects.
+- Weigh each defect by impact (low/medium/high) x frequency (once/repeated/persistent). Escalate to the highest weight automatically for: Cut-Off Speech that loses content, Distorted Speech that hurts understanding, Second Speaker, Persona Shift, Audio Overlap that hides speech, or any medium/high defect that is persistent across most turns.
+- Both clean or only trivial one-off defects -> "Both Good". Both clearly damaged at a similar level -> "Both Bad". Otherwise pick the model with the clearly lighter audio damage. Judge audio only, never content.
+NATURALNESS ("nea", binary A or B): from the per-turn audio notes (pace, warmth, rhythm, overacted/robotic, accent match) plus wording: prefer the more natural, warm, well-paced, regionally correct voice. A wrong regional accent/variant or non-native accent lowers NEA (it is not "Wrong Language"). Over-acted or robotic delivery lowers NEA and may justify the "Overacted" cluster.
+In the rationale describe audio problems by name, turn and timestamp, and say "slight", "noticeable" or "serious" if needed, but NEVER the words Minor, Moderate or Major.`;
+    const RATIONALE_SECTIONS = ['Overall Preference:', 'Decided mainly by:', 'Reasoning:', 'Utility:', 'Audio Quality:', 'Conversational Dynamics:', 'Naturalness / Engagement / Aesthetics:', 'Task Success:', 'Evidence:', 'Flagged Error Cluster:'];
+    function sanitizeRationale(text) {
+      let out = String(text == null ? '' : text);
+      try {
+        out = out.replace(/\bminor\b/gi, 'slight').replace(/\bmoderate\b/gi, 'noticeable').replace(/\bmajor\b/gi, 'serious');
+        const r = (typeof appState !== 'undefined' && appState.ratings) || {};
+        const pref = (v) => v === 'Response A' ? 'Model A preferred' : v === 'Response B' ? 'Model B preferred' : v === 'Both Good' ? 'Tie (both good)' : v === 'Both Bad' ? 'Tie (both bad)' : v === 'Tie' ? 'Tie (both good)' : null;
+        const fixLine = (label, val) => {
+          const p = pref(val);
+          if (!p) return;
+          const re = new RegExp('^(' + label.replace(/[\/.*+?^${}()|[\]\\]/g, '\\$&') + ':\\s*)(?:\\[)?([^\\n\\u2014\\u2013]*?)(?:\\])?(\\s+[\\u2014\\u2013-]\\s+|\\s*$)', 'm');
+          out = out.replace(re, (m, a, b, c) => a + p + c);
+        };
+        fixLine('Utility', r.utility);
+        fixLine('Audio Quality', r.aq);
+        fixLine('Conversational Dynamics', r.cd);
+        fixLine('Naturalness / Engagement / Aesthetics', r.nea);
+        if (r.overall === 'Response A' || r.overall === 'Response B') {
+          const mdl = r.overall === 'Response A' ? 'Model A' : 'Model B';
+          out = out.replace(/^(Overall Preference:\s*)Model [AB]/m, '$1' + mdl);
+        }
+        if (['Pass', 'Fail', 'Partial'].includes(r.tsA) && ['Pass', 'Fail', 'Partial'].includes(r.tsB)) {
+          out = out.replace(/^(Task Success:\s*)Model A\s+\w+;\s*Model B\s+\w+/m, '$1Model A ' + r.tsA + '; Model B ' + r.tsB);
+        }
+        const missing = RATIONALE_SECTIONS.filter(s => !out.includes(s));
+        if (missing.length && out.trim() && typeof showToast === 'function') {
+          showToast('الـ Rationale ناقص أقسام: ' + missing.map(s => s.replace(':', '')).join(', '), true);
+        }
+      } catch (e) { /* never block */ }
+      return out;
+    }
 
     const ERROR_CLUSTER_GROUPS = [
       {
@@ -1669,11 +1753,9 @@ Classify "turnState" accurately into ONE of 3 states:
       return `NATURAL TONE, PRONUNCIATION & RELATIONSHIP MATCHING:
 - NEUTRAL / STANDARD TASKS: STRICTLY FORBIDDEN to use cliché or over-familiar nicknames ("يا فندم", "يا أبو الصحاب", "يا أبو حميد", "يا فنان", "يا باشمهندس", "يا هندسة", "يا كبير", "يا معلم", "يا برنس", "يا غالي", "يا سيدي", "يا صاحبي"). Start directly and naturally like speaking to someone you don't know personally ("عايز أعرف...", "لو سمحت كنت محتاج أسأل عن...", "ممكن تساعدني في...", "ممكن سؤال؟").
 - EMOTIONAL / CLOSE ROLEPLAY TASKS ONLY: Match warmth naturally when the task explicitly specifies a friend/partner/family/emotional scenario.
-- READ THE TASK CARD LANGUAGE FIRST: Before writing, take the language(s) from the task card analysis (userLanguage / userDialect for everything the user says, plus any language the task card says the user must speak, switch to, or mix, such as English, French or Arabic with English words). Write the script in exactly those language(s) and dialect; if the card asks for a second language in part of the conversation, switch only where the card says. Then apply the rules below for EACH language you actually write: Arabic gets selective diacritics and Egyptian-style spoken numbers; French keeps every accent, writes numbers in French words ("soixante-dix", "quatre-vingts", "mille deux cent"), and uses spoken contractions ("j'ai", "t'as"); English writes numbers in English words and uses natural contractions ("I'm", "don't"). A word borrowed from another language stays in its own language's standard spelling (an English word inside French or Arabic stays "meeting", never respelled French-style or in Arabic letters; a French word inside English keeps its accents). For a rare name or word a voice could misread, keep its original spelling and put a short natural lead-in before it ("اسمه", "called", "il s'appelle") so it is read as a name.
-- NUMBERS (SAY THEM THE WAY A PERSON SPEAKS): Never leave digits or symbols (%, $, #, +, =, /, ×) in the script. Write every number as spoken words in the language of the sentence it sits in, in the user's dialect: prices ("مية وخمسين جنيه"), years ("ألفين وستة وعشرين"), times ("الساعة تلاتة ونص", "تمانية إلا ربع"), dates, percentages ("خمستاشر في المية"), decimals ("اتنين فاصل خمسة", "تلاتة ونص"), ordinals ("التالت", "الخامسة"), ranges ("من خمسة لعشرة"), and units ("عشرين كيلو", "اتنين ميجا"). Make the counted noun agree the way people actually say it in the dialect ("تلات كتب", "خمس سنين", "عشر دقايق", "أربعة وعشرين ساعة" only if natural). Phone numbers, order numbers, codes and PINs are said digit by digit in small groups ("صفر واحد صفر، اتنين تلاتة أربعة..."). A number inside an English or French sentence is written as words in THAT language ("twenty twenty-six", "cent cinquante euros"), never as digits and never in the other language's words.
-- MIXED-LANGUAGE SPEECH (ARABIC + ENGLISH, FRENCH + ENGLISH, ETC.): Write like a real bilingual person talks, so the voice switches accent cleanly. Keep each language in its OWN script and correct spelling: Arabic words in Arabic letters, English words in Latin letters, French in Latin letters WITH its accents (é è ê à ù ç ô î) because they decide pronunciation. Never transliterate English or French into Arabic letters and never use Arabizi (3, 7, 5, 2 as letters). Switch at a natural boundary (a whole word, term, name or short phrase, not a random half-word), put a normal space on both sides of the switch, and do not glue Arabic prefixes onto Latin words (write "في meeting" not "فالـmeeting", "ال API" is fine as "الـ API" with spaces). Product names, brands, app names, file formats and acronyms stay in Latin ("ChatGPT", "iPhone", "PDF", "Wi-Fi"). Spell acronyms as the person says them: say-as-a-word acronyms stay as written ("NASA"), letter-by-letter ones are spaced ("A P I" only if the voice needs it; default "API"). A full sentence that is entirely in English or French is written entirely in that language with that language's punctuation. Do not invent code-switching: only mix when the speaker's dialect or the task naturally does, and never change the task's required language. Never put Arabic diacritics on Latin text or Latin accents on Arabic words.
-- SELECTIVE ARABIC DIACRITICS (LIGHT, NEVER FULL TASHKEEL): Default is clean text. Add a diacritic only where a TTS would otherwise pick the wrong word or sound, namely: (1) true homographs where context does not settle it ("طَبَق/طَبَّق", "كَتَب/كُتُب", "عَلَم/عِلْم", "شَعْر/شِعْر", "حَبّ/حُبّ", "مَدرَسة" only if unclear, "سَنة/سِنة", "دَرَس/دَرّس"), (2) verbs where the vowel or shadda changes tense or meaning ("وَصَل/وَصّل", "كَسَر/كَسّر"), (3) names, places and loanwords a voice would likely mispronounce (give just the one mark that fixes it), (4) the feminine Kasra before "ك" when addressing a female ("عندِك", "منِّك"). Hard limits: at most about one marked word in every eight to ten words, one mark (two with a shadda) per word, never mark a whole word or a whole sentence, never mark common words whose reading is obvious, and never add formal case endings (no final damma/fatha/kasra/tanween for grammar); mark the vowel inside the word only and keep the dialect's real pronunciation, not MSA. If unsure, leave the word clean.
-- SPOKEN-STYLE PUNCTUATION: Short sentences. Use commas and full stops to give natural breathing points, "..." only for a real hesitation. No markdown, bullets, emojis, parentheses, slashes, or abbreviations (write "دكتور" not "د."، "ساعة" not "س") because the voice reads them literally.`;
+- TASK-CARD LANGUAGES: Write the script in the language(s) the task card requires (userLanguage/userDialect, plus any language the task says the user must speak or mix). In English or French sentences write numbers as words in that language too ("twenty twenty-six", "cent cinquante euros"), keep French accents, and keep a borrowed word in its own language's spelling (an English word inside Arabic or French stays in Latin letters, never in Arabic letters).
+- NUMBERS & CODE-SWITCHING: Spell out ALL numbers, prices, years, times, and percentages as natural spoken words in the exact user language/dialect (e.g., "مية وخمسين جنيه" not "150 جنيه", "الساعة تلاتة ونص" not "3:30"). Keep clear English tech terms/brands (API, PDF, iPhone, ChatGPT, budget, update) in Latin script with spaces before and after.
+- SURGICAL ARABIC TASHKEEL: Keep 95%+ of Arabic words clean without diacritics, adding a single vowel or Shadda (ّ) ONLY on ambiguous homographs like طَبَق vs طَبَّق, كَتَب vs كُتُب, عَلَم vs عِلْم, شَعْر vs شِعْر, حَبّ vs حُبّ, plus required feminine Kasra on "-ِك" words.`;
     }
 
     // -------------------- OFFICIAL 14 ERROR CLUSTERS TABLE & AUTO-TRACKING --------------------
@@ -2268,70 +2350,10 @@ Classify "turnState" accurately into ONE of 3 states:
     }
 
     // -------------------- ELEVENLABS TTS, AUTONOMOUS ACTIONS & STT --------------------
-    // v6: safety-net speech prep. Only runs on text that still has digits/symbols or glued scripts; any failure returns the text untouched.
-    function egyptianNumberWords(n) {
-      n = Math.floor(Number(n));
-      if (!isFinite(n) || n < 0 || n > 999999999) return null;
-      if (n === 0) return 'صفر';
-      const U = ['', 'واحد', 'اتنين', 'تلاتة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'تمانية', 'تسعة', 'عشرة', 'حداشر', 'اتناشر', 'تلاتاشر', 'أربعتاشر', 'خمستاشر', 'ستاشر', 'سبعتاشر', 'تمنتاشر', 'تسعتاشر'];
-      const T = ['', '', 'عشرين', 'تلاتين', 'أربعين', 'خمسين', 'ستين', 'سبعين', 'تمانين', 'تسعين'];
-      const H = ['', 'مية', 'ميتين', 'تلتمية', 'ربعمية', 'خمسمية', 'ستمية', 'سبعمية', 'تمنمية', 'تسعمية'];
-      const below1000 = (x) => {
-        const parts = [];
-        const h = Math.floor(x / 100), r = x % 100;
-        if (h) parts.push(H[h]);
-        if (r) {
-          if (r < 20) parts.push(U[r]);
-          else { const u = r % 10; parts.push(u ? U[u] + ' و' + T[Math.floor(r / 10)] : T[Math.floor(r / 10)]); }
-        }
-        return parts.join(' و');
-      };
-      const group = (x, one, two, few, many) => {
-        if (x === 1) return one;
-        if (x === 2) return two;
-        if (x >= 3 && x <= 10) return below1000(x) + ' ' + few;
-        return below1000(x) + ' ' + many;
-      };
-      const out = [];
-      const m = Math.floor(n / 1000000), k = Math.floor((n % 1000000) / 1000), r = n % 1000;
-      if (m) out.push(group(m, 'مليون', 'مليونين', 'ملايين', 'مليون'));
-      if (k) out.push(group(k, 'ألف', 'ألفين', 'تلاف', 'ألف').replace(/^(تلات|أربع|خمس|ست|سبع|تمان|تسع|عشر)\S* تلاف$/, (x) => x).replace('تلاتة تلاف', 'تلات تلاف').replace('أربعة تلاف', 'أربع تلاف').replace('خمسة تلاف', 'خمس تلاف').replace('ستة تلاف', 'ست تلاف').replace('سبعة تلاف', 'سبع تلاف').replace('تمانية تلاف', 'تمن تلاف').replace('تسعة تلاف', 'تسع تلاف').replace('عشرة تلاف', 'عشر تلاف'));
-      if (r) out.push(below1000(r));
-      return out.join(' و');
-    }
-
-    function prepareSpeechText(text) {
-      const original = String(text || '');
-      try {
-        const tags = [];
-        let s = original.replace(/\[[^\]]*\]/g, (m) => { tags.push(m); return '\u0001' + String.fromCharCode(96 + tags.length) + '\u0001'; });
-        // keep Arabic and Latin runs apart with a space (prefix glue like "ال" + Latin, or Latin + Arabic)
-        // Arabic diacritics never belong on Latin letters
-        s = s.replace(/([A-Za-z\u00C0-\u024F])[\u064B-\u0652\u0670]+/g, '$1');
-        s = s.replace(/([\u0600-\u06FF])([A-Za-z\u00C0-\u024F])/g, '$1 $2').replace(/([A-Za-z\u00C0-\u024F])([\u0621-\u064A])/g, '$1 $2');
-        s = s.replace(/\u0640/g, '');
-        // last-resort digit handling: only when the previous word is Arabic text
-        s = s.replace(/(^|[^\w\u0600-\u06FF])([\u0660-\u0669]+|\d+)(%?)(?![\w\u0600-\u06FF])/g, (m, pre, num, pct, off, whole) => {
-          const before = whole.slice(0, off).trimEnd();
-          const lastWord = before.split(/\s+/).pop() || '';
-          const afterWord = (whole.slice(off + m.length).trimStart().split(/\s+/)[0] || '');
-          if (lastWord ? !/[\u0600-\u06FF]/.test(lastWord) : !/[\u0600-\u06FF]/.test(afterWord)) return m;
-          const ascii = num.replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x660));
-          if (ascii.length > 9) return m;
-          const w = egyptianNumberWords(parseInt(ascii, 10));
-          if (!w) return m;
-          return pre + w + (pct ? ' في المية' : '');
-        });
-        s = s.replace(/\u0001([a-z])\u0001/g, (m, c) => tags[c.charCodeAt(0) - 97] || '');
-        return s;
-      } catch (_) {
-        return original;
-      }
-    }
-
     function cleanTextForElevenLabs(text, modelId, allowTags = true) {
       let s = String(text || '').replace(/[*_#`~>|"]/g, '').replace(/\s+/g, ' ').trim();
-      s = prepareSpeechText(s);
+      // v7: only removes Arabic diacritics that got stuck on Latin letters; everything else is untouched
+      try { s = s.replace(/([A-Za-z\u00C0-\u024F])[\u064B-\u0652\u0670]+/g, '$1'); } catch (_) {}
       if (!allowTags || !/v3|v4/i.test(modelId || '')) {
         s = s.replace(/\[[^\]]{1,28}\]/g, '').replace(/\s+/g, ' ').trim();
       }
@@ -3204,9 +3226,12 @@ Return STRICT JSON with these exact keys:
         if (Array.isArray(data.audioCheck?.perceptualIssues)) {
           data.audioCheck.perceptualIssues.forEach(lbl => {
             if (lbl && !dsp.anomalies.some(a => a.label === lbl)) {
-              const tLbl = formatTime(Math.floor(dsp.latencySec || 0));
-              dsp.anomalies.push({ label: lbl, category: 'cluster', timeSec: Math.max(0, dsp.latencySec || 0), timeLabel: tLbl, detail: 'AI perceptual check' });
-              recordAutoFlag(m, curTurn, lbl, tLbl, 'AI perceptual check');
+              const dt = (data.audioCheck.issueDetails || []).find(d => d.label === lbl) || {};
+              const tSec = (dt.timeSec != null) ? dt.timeSec : Math.max(0, dsp.latencySec || 0);
+              const tLbl = formatTime(Math.floor(tSec));
+              const det = 'AI audio review; ' + (dt.frequency || 'once') + '; impact ' + (dt.impact || 'medium');
+              dsp.anomalies.push({ label: lbl, category: 'aq', timeSec: tSec, timeLabel: tLbl, detail: det });
+              recordAutoFlag(m, curTurn, lbl, tLbl, det);
             }
           });
         }
@@ -3283,6 +3308,17 @@ Return STRICT JSON with these exact keys:
           dsp.anomalies.forEach(a => recordAutoFlag(m, curTurn, a.label, a.timeLabel, a.detail));
         }
         detectedClusters.forEach(cl => recordAutoFlag(m, curTurn, cl, formatTime(appState.timers[m]), 'AI final check'));
+        try {
+          (audioCheck && audioCheck.issueDetails || []).forEach(dt => {
+            if (dsp.anomalies && !dsp.anomalies.some(a => a.label === dt.label)) {
+              const tSec = dt.timeSec != null ? dt.timeSec : 0;
+              const tLbl = formatTime(Math.floor(tSec));
+              const det = 'AI audio review; ' + dt.frequency + '; impact ' + dt.impact;
+              dsp.anomalies.push({ label: dt.label, category: 'aq', timeSec: tSec, timeLabel: tLbl, detail: det });
+              recordAutoFlag(m, curTurn, dt.label, tLbl, det);
+            }
+          });
+        } catch (e) {}
 
         const resolvedGender = appState.listenerGender === 'f' ? 'female' : 'male';
         const currentUserScript = document.getElementById('current-script-box').value.trim();
@@ -3345,14 +3381,16 @@ Return STRICT JSON with these exact keys:
       const targetLang = p.modelTargetLanguage || p.language || '';
       const targetDial = p.modelTargetDialect || p.dialect || '';
       const prompt = `This is the FINAL spoken reply of Model ${m} in a Live S2S evaluation (Model Target Language/Dialect: ${targetLang} - ${targetDial}).
-Transcribe verbatim what Model ${m} said in "heard", perform a brief perceptual audio check, and list any official Error Clusters clearly observed in this reply in "detectedClusters" (especially "Wrong Language" or "Wrong Accent/Variant" if it drifted from its target). Do NOT generate any new user turn.
+Transcribe verbatim what Model ${m} said in "heard", perform the AUDIO REVIEW below (fill "audioCheck"), and list any official Error Clusters clearly observed in this reply in "detectedClusters" (especially "Wrong Language" or "Wrong Accent/Variant" if it drifted from its target). Do NOT generate any new user turn.
+${AQ_REVIEW_INSTRUCTIONS}
 Return STRICT JSON:
 {
   "heard": "verbatim transcript of Model ${m}'s final reply",
-  "audioCheck": { "detectedGender": "male | female | unclear", "accentNote": "short note", "perceptualIssues": [] },
+  "audioCheck": ${AQ_JSON_SCHEMA},
   "detectedClusters": []
 }`;
       const { data } = await callLLM(prompt, { audioPart });
+      try { if (data && data.audioCheck) data.audioCheck = normalizeAudioCheck(data.audioCheck); } catch (e) {}
       return data;
     }
 
@@ -3452,7 +3490,8 @@ Model ${m}'s actual spoken reply is in the attached audio clip.
    - If Model ${m} drifted from its target language/dialect, naturally ask it to switch back.
    - If "turnState" is "holding", write a polite check-in (used ONLY if it stalls after 7 seconds).
    - If "turnState" is "incomplete", naturally prompt it to continue or steer back to the task objective.
-5. Perform a brief perceptual audio check in "audioCheck".
+5. Fill "audioCheck" using the AUDIO REVIEW below.
+${AQ_REVIEW_INSTRUCTIONS}
 6. If executionMode is "false_alarm_barge_in" or "verbal_barge_in" and another test is appropriate, populate "autonomousAction"; else type "none".
 7. Set "isCompletionGateMet": true ONLY if elapsed >= minDurationSec AND completed turns >= minUserTurns AND the task objective has been thoroughly tested.
 
@@ -3462,11 +3501,7 @@ Return STRICT JSON:
   "turnState": "complete | holding | incomplete",
   "turnComplete": true,
   "detectedClusters": [],
-  "audioCheck": {
-    "detectedGender": "male | female | unclear",
-    "accentNote": "short note on accent/tone",
-    "perceptualIssues": []
-  },
+  "audioCheck": ${AQ_JSON_SCHEMA},
   "nextUserScript": "gender-audited, ElevenLabs-ready spoken user turn strictly in the USER SPEAKING TRACK dialect",
   "arabicTranslation": "Egyptian Arabic translation ONLY if script is non-Arabic, else empty string",
   "autonomousAction": {
@@ -3478,6 +3513,7 @@ Return STRICT JSON:
   "isCompletionGateMet": false
 }`;
       const { data } = await callLLM(prompt, { audioPart, signal });
+      try { if (data && data.audioCheck) data.audioCheck = normalizeAudioCheck(data.audioCheck); } catch (e) {}
       return data;
     }
 
@@ -3790,7 +3826,23 @@ Return STRICT JSON:
           const dspNotes = t.dsp?.anomalies?.length
             ? ` [DSP Audio Flags: ${t.dsp.anomalies.map(a => `${a.label} (${a.timeLabel})`).join(', ')}]`
             : (t.dsp ? ` [DSP: Clean, Lat ${t.dsp.latencySec}s, SNR ${t.dsp.snrDb ?? 'n/a'}dB]` : '');
-          return `T${t.turn} (${t.time}) User: ${t.user}${evs}\nT${t.turn} (${t.time}) Model ${m}: ${t.model}${dspNotes}`;
+          let aNotes = '';
+          try {
+            const ac = t.audioCheck;
+            if (ac) {
+              const nat = ac.naturalness || {};
+              const bits = [];
+              if (ac.accentNote) bits.push('accent: ' + ac.accentNote);
+              if (nat.accentMatch) bits.push('accent match: ' + nat.accentMatch);
+              if (nat.pace) bits.push('pace: ' + nat.pace);
+              if (nat.warmth) bits.push('warmth: ' + nat.warmth);
+              if (nat.rhythm) bits.push('rhythm: ' + nat.rhythm);
+              if (nat.overacted) bits.push('overacted delivery');
+              if (nat.robotic) bits.push('robotic delivery');
+              if (bits.length) aNotes = ` [Audio Naturalness: ${bits.join('; ')}]`;
+            }
+          } catch (e) {}
+          return `T${t.turn} (${t.time}) User: ${t.user}${evs}\nT${t.turn} (${t.time}) Model ${m}: ${t.model}${dspNotes}${aNotes}`;
         })
         .join('\n');
 
@@ -3863,6 +3915,8 @@ Valid Rating Values:
 - tsB: "Pass" | "Fail" | "Partial"
 - errorClusters.A / errorClusters.B: array using ONLY names from: ${JSON.stringify(ALL_ERROR_CLUSTERS)}
 
+${AQ_NEA_DECISION_RULES}
+
 ${RATIONALE_STYLE_INSTRUCTIONS}
 
 Ensure the "rationale" text is 100% consistent with the JSON ratings and errorClusters you select!
@@ -3905,7 +3959,7 @@ Return STRICT JSON:
           }
         }
         if (data?.rationale) {
-          document.getElementById('rationale-output').value = String(data.rationale).trim();
+          document.getElementById('rationale-output').value = sanitizeRationale(String(data.rationale).trim());
         }
         updateStepperAndBadges();
         persistSessionSnapshot();
@@ -3949,11 +4003,13 @@ USER'S EXACT SELECTED RATINGS (MUST MATCH 100%):
 - Task Success: Model A = ${r.tsA}; Model B = ${r.tsB}
 - Checked Error Clusters: ${checkedClustersSummary}
 
+${AQ_NEA_DECISION_RULES}
+
 ${RATIONALE_STYLE_INSTRUCTIONS}
 
 Return plain English text ONLY (no JSON, no markdown code blocks).`;
           const { data } = await callLLM(prompt, { mode: 'eval', expectJson: false });
-          document.getElementById('rationale-output').value = String(data || '').trim();
+          document.getElementById('rationale-output').value = sanitizeRationale(String(data || '').trim());
         } else {
           const fmtChoice = (val) => val === 'Response A' ? 'Model A preferred' : val === 'Response B' ? 'Model B preferred' : val === 'Both Good' ? 'Tie (both good)' : val === 'Both Bad' ? 'Tie (both bad)' : 'Tie (both good)';
           const prefModel = r.overall === 'Response A' ? 'Model A' : 'Model B';
