@@ -54,64 +54,109 @@
 <body class="min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-zinc-700 selection:text-white">
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2.5 bg-zinc-900 border border-zinc-700 text-zinc-100 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold max-w-[92vw]">
+  <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] hidden items-center gap-2.5 bg-zinc-900 border border-zinc-700 text-zinc-100 px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold max-w-[92vw]">
     <span id="toast-dot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
     <span id="toast-text" class="leading-snug">تم</span>
   </div>
 
-  <!-- TOP HEADER -->
-  <header class="sticky top-0 z-40 bg-obsidian-950/95 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3 flex items-center justify-between gap-3">
-    <div class="flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white shrink-0">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-        </svg>
+  <!-- FLOATING MODAL 1: USER GENDER PROMPT (AFTER TASK SCREENSHOT) -->
+  <div id="user-gender-modal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-obsidian-900 border border-zinc-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4 text-center">
+      <div class="space-y-1">
+        <div class="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-zinc-800 border border-zinc-700 text-xl mb-1">👤</div>
+        <h3 class="text-base font-extrabold text-white">أنت ولد ولا بنت؟</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">حدد جنسك عشان الكلام اللي هيتولدلك يطلع بصيغة كلامك الطبيعية (مثلاً: عايز / عايزة، محتاج / محتاجة).</p>
       </div>
-      <span class="font-bold text-sm tracking-tight text-white hidden sm:inline">Live S2S Arena Studio</span>
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <button type="button" onclick="confirmUserGenderAndAnalyze('m')" class="py-3.5 px-4 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-sm font-extrabold flex flex-col items-center gap-1 transition">
+          <span class="text-xl">👨</span>
+          <span>ولد (راجل)</span>
+        </button>
+        <button type="button" onclick="confirmUserGenderAndAnalyze('f')" class="py-3.5 px-4 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-sm font-extrabold flex flex-col items-center gap-1 transition">
+          <span class="text-xl">👩</span>
+          <span>بنت</span>
+        </button>
+      </div>
     </div>
-
-    <!-- 2-View Switcher -->
-    <nav class="flex items-center bg-zinc-900 p-1 rounded-xl border border-zinc-800">
-      <button type="button" onclick="switchView('workspace')" id="nav-workspace" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-zinc-950 shadow-sm transition">
-        التاسك (Task)
-      </button>
-      <button type="button" onclick="switchView('settings')" id="nav-settings" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition">
-        الإعدادات (Settings)
-      </button>
-    </nav>
-
-    <div class="flex items-center gap-2 text-[11px] font-mono text-zinc-400">
-      <span id="header-model-badge" class="hidden md:inline px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800">gemini-3.8-flash</span>
-      <span id="header-11-badge" class="px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800">eleven_v4_turbo</span>
-    </div>
-  </header>
-
-  <!-- PERMANENT LIVE STATUS HUD -->
-  <div id="live-status-hud" class="sticky top-[57px] z-30 bg-obsidian-900/95 backdrop-blur border-b border-zinc-800/80 px-4 py-2 flex items-center justify-between gap-3">
-    <div class="flex items-center gap-2.5 min-w-0">
-      <span id="hud-dot" class="w-2.5 h-2.5 rounded-full bg-zinc-500 shrink-0"></span>
-      <span id="hud-status-text" class="text-xs font-semibold text-zinc-200 truncate">في الانتظار — صوّر التاسك للبدء</span>
-    </div>
-    <span id="hud-phase-badge" class="font-mono text-[10px] px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 shrink-0">IDLE</span>
   </div>
 
-  <!-- UNIVERSAL ERROR & RETRY BAR -->
-  <div id="error-retry-bar" class="hidden sticky top-[92px] z-30 bg-zinc-950/95 backdrop-blur border-b border-rose-500/40 px-4 py-2.5">
-    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-start gap-2.5 min-w-0 flex-1">
-        <span class="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0"></span>
-        <div class="min-w-0">
-          <div id="error-retry-title" class="text-xs font-bold text-rose-300">حدث خطأ أثناء التنفيذ</div>
-          <div id="error-retry-detail" class="text-[11px] text-zinc-400 break-words leading-snug mt-0.5"></div>
-        </div>
+  <!-- FLOATING TAB 2: MODEL VOICE GENDER PROMPT (EVERY MODEL REPLY) -->
+  <div id="model-gender-float" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[55] hidden w-[94vw] max-w-md bg-obsidian-900/95 backdrop-blur-md border border-emerald-500/50 rounded-2xl p-3.5 shadow-2xl">
+    <div class="flex items-center justify-between gap-2 mb-2.5">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+        <span id="model-gender-float-title" class="text-xs font-extrabold text-white">اللي بيرد عليك دلوقتي راجل ولا بنت؟</span>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <button type="button" onclick="retryLastFailedAction()" id="btn-universal-retry" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-extrabold flex items-center gap-1.5 transition">
-          <span>🔄 إعادة المحاولة</span>
+      <button type="button" onclick="hideModelGenderFloat()" class="text-zinc-400 hover:text-white text-sm px-1.5 leading-none" title="إخفاء">×</button>
+    </div>
+    <div class="grid grid-cols-2 gap-2.5">
+      <button type="button" onclick="selectModelGenderFromFloat('m')" id="float-btn-gender-m" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-white hover:text-zinc-950 border border-zinc-700 text-white text-xs font-extrabold flex items-center justify-center gap-2 transition">
+        <span>👨</span>
+        <span>راجل</span>
+      </button>
+      <button type="button" onclick="selectModelGenderFromFloat('f')" id="float-btn-gender-f" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-white hover:text-zinc-950 border border-zinc-700 text-white text-xs font-extrabold flex items-center justify-center gap-2 transition">
+        <span>👩</span>
+        <span>بنت</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ALWAYS-FIXED TOP CHROME (HEADER + EXPANDED DYNAMIC STATUS HUD + ERROR BAR) -->
+  <div id="fixed-top-chrome" class="fixed top-0 left-0 right-0 z-40 shadow-xl shadow-black/40">
+    <!-- TOP HEADER -->
+    <header class="bg-obsidian-950/95 backdrop-blur-md border-b border-zinc-800/80 px-4 py-2.5 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+          </svg>
+        </div>
+        <span class="font-bold text-sm tracking-tight text-white hidden sm:inline">Live S2S Arena Studio</span>
+      </div>
+
+      <!-- 2-View Switcher -->
+      <nav class="flex items-center bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+        <button type="button" onclick="switchView('workspace')" id="nav-workspace" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white text-zinc-950 shadow-sm transition">
+          التاسك (Task)
         </button>
-        <button type="button" onclick="clearErrorRetry()" class="px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition" title="إخفاء">
-          ×
+        <button type="button" onclick="switchView('settings')" id="nav-settings" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition">
+          الإعدادات (Settings)
         </button>
+      </nav>
+
+      <div class="flex items-center gap-2 text-[11px] font-mono text-zinc-400">
+        <span id="header-model-badge" class="hidden md:inline px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800">gemini-3.8-flash</span>
+        <span id="header-11-badge" class="px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800">eleven_v4_turbo</span>
+      </div>
+    </header>
+
+    <!-- PERMANENT EXPANDED LIVE STATUS HUD (NEVER TRUNCATED, ALWAYS FIXED) -->
+    <div id="live-status-hud" class="bg-obsidian-900/95 backdrop-blur-md border-b border-zinc-700/80 px-4 py-2.5 flex items-start justify-between gap-3">
+      <div class="flex items-start gap-2.5 min-w-0 flex-1">
+        <span id="hud-dot" class="w-2.5 h-2.5 rounded-full bg-zinc-500 shrink-0 mt-1.5"></span>
+        <div id="hud-status-text" class="text-xs sm:text-sm font-bold text-zinc-100 leading-relaxed whitespace-normal break-words">في الانتظار — صوّر التاسك للبدء</div>
+      </div>
+      <span id="hud-phase-badge" class="font-mono text-[10px] px-2.5 py-1 rounded-md bg-zinc-950 border border-zinc-700 text-zinc-300 shrink-0 mt-0.5">IDLE</span>
+    </div>
+
+    <!-- UNIVERSAL ERROR & RETRY BAR -->
+    <div id="error-retry-bar" class="hidden bg-zinc-950/95 backdrop-blur border-b border-rose-500/40 px-4 py-2.5">
+      <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-start gap-2.5 min-w-0 flex-1">
+          <span class="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0"></span>
+          <div class="min-w-0">
+            <div id="error-retry-title" class="text-xs font-bold text-rose-300">حدث خطأ أثناء التنفيذ</div>
+            <div id="error-retry-detail" class="text-[11px] text-zinc-400 break-words leading-snug mt-0.5"></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="retryLastFailedAction()" id="btn-universal-retry" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-extrabold flex items-center gap-1.5 transition">
+            <span>🔄 إعادة المحاولة</span>
+          </button>
+          <button type="button" onclick="clearErrorRetry()" class="px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition" title="إخفاء">
+            ×
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -192,7 +237,7 @@
         <ol id="timing-list" class="space-y-1 pt-2 text-zinc-400 font-mono text-[11px]"></ol>
       </details>
 
-      <!-- Model Tabs, Gender & Stopwatch -->
+      <!-- Model Tabs, User/Model Gender, Audio Tags & Stopwatch -->
       <div class="bg-obsidian-900 border border-zinc-800/80 rounded-2xl p-3 space-y-2.5">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-1 bg-obsidian-950 p-1 rounded-xl border border-zinc-800">
@@ -216,19 +261,36 @@
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-800/80 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="text-zinc-500 text-[11px]">صوت الموديل:</span>
-            <div class="flex items-center bg-obsidian-950 p-0.5 rounded-lg border border-zinc-800 text-[11px]">
-              <button type="button" onclick="setListenerGender('m')" id="btn-gender-m" class="px-2.5 py-1 rounded-md bg-zinc-800 text-white font-semibold">راجل</button>
-              <button type="button" onclick="setListenerGender('f')" id="btn-gender-f" class="px-2.5 py-1 rounded-md text-zinc-400">بنت</button>
-              <button type="button" onclick="setListenerGender('auto')" id="btn-gender-auto" class="px-2.5 py-1 rounded-md text-zinc-400">محايد</button>
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- User Gender Switch -->
+            <div class="flex items-center gap-1">
+              <span class="text-zinc-500 text-[11px]">أنت:</span>
+              <div class="flex items-center bg-obsidian-950 p-0.5 rounded-lg border border-zinc-800 text-[11px]">
+                <button type="button" onclick="setUserGender('m')" id="btn-user-gender-m" class="px-2 py-1 rounded-md bg-zinc-800 text-white font-semibold">ولد</button>
+                <button type="button" onclick="setUserGender('f')" id="btn-user-gender-f" class="px-2 py-1 rounded-md text-zinc-400">بنت</button>
+              </div>
+            </div>
+            <!-- Model Voice Gender Switch -->
+            <div class="flex items-center gap-1">
+              <span class="text-zinc-500 text-[11px]">الموديل:</span>
+              <div class="flex items-center bg-obsidian-950 p-0.5 rounded-lg border border-zinc-800 text-[11px]">
+                <button type="button" onclick="setListenerGender('m')" id="btn-gender-m" class="px-2 py-1 rounded-md bg-zinc-800 text-white font-semibold">راجل</button>
+                <button type="button" onclick="setListenerGender('f')" id="btn-gender-f" class="px-2 py-1 rounded-md text-zinc-400">بنت</button>
+                <button type="button" onclick="setListenerGender('auto')" id="btn-gender-auto" class="px-2 py-1 rounded-md text-zinc-400">محايد</button>
+              </div>
             </div>
           </div>
 
-          <label class="inline-flex items-center gap-2 text-[11px] text-zinc-300 cursor-pointer select-none">
-            <input type="checkbox" id="auto-loop-toggle" checked class="rounded bg-zinc-900 border-zinc-700 text-white focus:ring-0">
-            <span>تشغيل تلقائي ذكي (تحدث ➔ استمع)</span>
-          </label>
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="inline-flex items-center gap-1.5 text-[11px] text-zinc-300 cursor-pointer select-none" title="إدراج تاجات المشاعر والأصوات مثل [laughs] [coughs] [sighs] [sad] لـ ElevenLabs">
+              <input type="checkbox" id="workspace-audio-tags-toggle" checked onchange="toggleAudioTagsOption(this.checked)" class="rounded bg-zinc-900 border-zinc-700 text-white focus:ring-0">
+              <span>تاجات المشاعر والأصوات (Tags)</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 text-[11px] text-zinc-300 cursor-pointer select-none">
+              <input type="checkbox" id="auto-loop-toggle" checked class="rounded bg-zinc-900 border-zinc-700 text-white focus:ring-0">
+              <span>تلقائي (تحدث ➔ استمع)</span>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -295,7 +357,7 @@
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2 min-w-0">
             <span id="rec-dot" class="w-2.5 h-2.5 rounded-full bg-zinc-600 shrink-0"></span>
-            <span id="rec-status-title" class="text-xs font-bold text-zinc-200 truncate">الاستماع لصوت الموديل (Smart Endpointing)</span>
+            <span id="rec-status-title" class="text-xs font-bold text-zinc-200 leading-snug">الاستماع لصوت الموديل (Smart Endpointing)</span>
           </div>
           <span id="rec-timer" class="font-mono text-xs text-zinc-400 shrink-0">00:00</span>
         </div>
@@ -307,7 +369,7 @@
 
         <!-- Smart Endpointing Live Hint & +5s Extend Button -->
         <div id="endpointing-hint-bar" class="hidden bg-obsidian-950 border border-zinc-800 rounded-xl px-3 py-2 flex flex-wrap items-center justify-between gap-2">
-          <span id="endpointing-hint-text" class="text-[11px] font-semibold text-zinc-300"></span>
+          <span id="endpointing-hint-text" class="text-[11px] font-semibold text-zinc-300 leading-relaxed"></span>
           <button type="button" onclick="extendSilenceWait(5000)" id="btn-extend-wait" class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[11px] font-bold text-zinc-200 transition shrink-0">
             +5ث استنى
           </button>
@@ -344,7 +406,7 @@
       </div>
     </section>
 
-    <!-- COLUMN 3: OFFICIAL RATING FORM, 14 ERROR CLUSTERS & RATIONALE (NO MANUAL ISSUES TAB) -->
+    <!-- COLUMN 3: OFFICIAL RATING FORM, 14 ERROR CLUSTERS & RATIONALE -->
     <section id="rating-column" class="lg:col-span-4 flex flex-col bg-obsidian-900 border border-zinc-800/80 rounded-2xl overflow-hidden">
       <div class="bg-obsidian-950 border-b border-zinc-800/80 px-4 py-3 flex items-center justify-between gap-2">
         <div>
@@ -469,7 +531,7 @@
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2 class="text-lg font-bold text-white">API & Voice Configuration</h2>
-        <p class="text-xs text-zinc-400 mt-0.5">Configure your active Gemini model, Smart Endpointing, ElevenLabs v4 model, and Cloned Voice ID.</p>
+        <p class="text-xs text-zinc-400 mt-0.5">Configure your active Gemini model, Smart Endpointing, ElevenLabs v4 model, Expressive Tags, and Cloned Voice ID.</p>
       </div>
       <button type="button" onclick="saveSettings()" class="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-bold transition">
         Save & Return
@@ -568,6 +630,15 @@
             </div>
           </div>
 
+          <!-- Expressive Audio Tags Option -->
+          <label class="flex items-start gap-2.5 bg-obsidian-950 border border-zinc-800 rounded-xl p-3 cursor-pointer select-none">
+            <input id="cfg-enable-audio-tags" type="checkbox" checked class="mt-0.5 rounded bg-zinc-900 border-zinc-700 text-white focus:ring-0">
+            <div>
+              <div class="text-xs font-semibold text-zinc-200">Enable ElevenLabs Expressive Audio Tags</div>
+              <div class="text-[11px] text-zinc-400 mt-0.5">Allows context-appropriate tags like <span class="font-mono text-zinc-300">[laughs]</span>, <span class="font-mono text-zinc-300">[coughs]</span>, <span class="font-mono text-zinc-300">[sighs]</span>, <span class="font-mono text-zinc-300">[sad]</span>, <span class="font-mono text-zinc-300">[excited]</span>, <span class="font-mono text-zinc-300">[chuckles]</span> based on scenario requirements (v3 / v4).</div>
+            </div>
+          </label>
+
           <div class="grid grid-cols-3 gap-2 pt-1">
             <div class="bg-obsidian-950 border border-zinc-800 rounded-xl p-2">
               <div class="flex justify-between text-[10px] mb-1"><span class="text-zinc-500">Stability</span><span id="val-stab" class="font-mono text-zinc-200">0.50</span></div>
@@ -603,7 +674,7 @@
   <script>
     const STORAGE_KEY = 'live_s2s_studio_config_v2';
     const SESSION_STORAGE_KEY = 'live_s2s_session_snapshot_v2';
-    const PROMPT_VERSION = 'v9_auto_eval_lang_recovery';
+    const PROMPT_VERSION = 'v10_natural_speech_gender_floats';
 
     const ERROR_CLUSTER_GROUPS = [
       {
@@ -659,7 +730,12 @@ Carefully detect from the task screenshot:
   * Hybrid / Structural: "Balanced by dominant prompt intent"
 - Exact target language, exact regional dialect/accent, any code-switching rules, min/max duration (seconds), minUserTurns (1 Turn = 1 message from 1 party; "3+ turns" = at least 3 user turns), and all SKILLS TESTED.
 
-3. MANDATORY AUTO LANGUAGE-RECOVERY & ERROR DETECTION RULE
+3. STRICT NATURAL HUMAN SPEECH — NO AI CLICHÉS OR FORCED GREETINGS
+- NEVER use cheesy, stereotypical, or AI-sounding titles/nicknames such as "يا فنان", "يا باشمهندس", "يا هندسة", "يا كبير", "يا معلم", "يا برنس", "يا سيدي", "يا صاحبي" (or equivalent cliché nicknames in any other language), unless the task explicitly mandates a specific roleplay character that uses them.
+- RARELY use generic filler greetings like "إزيك", "عامل إيه", "أهلاً بيك", "مساء الخير", "Hey there, how are you?". Almost always jump straight and naturally into the real task request/topic like a real person talking to a voice assistant (e.g., "لو سمحت كنت محتاج أعرف...", "ممكن تساعدني في...", "بص أنا بفكر في...").
+- Keep phrasing 100% natural, spontaneous, grounded in the exact task context, and properly aligned with BOTH the user's grammatical gender (self-reference) and the AI model's voice gender (addressing the model).
+
+4. MANDATORY AUTO LANGUAGE-RECOVERY & ERROR DETECTION RULE
 - On EVERY turn, check if the AI model responded in a language DIFFERENT from the task's required target language (excluding natural expected loanwords or explicitly requested code-switching).
 - If the model spoke in the WRONG language (e.g., replied in English when Egyptian Arabic is required, or vice versa):
   1. Immediately include "Wrong Language" in "detectedClusters".
@@ -668,27 +744,29 @@ Carefully detect from the task screenshot:
 - Also automatically flag any other clearly observed official Error Clusters in "detectedClusters" from the 14 official clusters only:
   [Bridging Quality, Looping/LLMism, Interrupted User, Instruction Following Quality, Inaccuracy, Anthropomorphism, Failed Correction, Overacted, Wrong Language, Bad ASR/Misunderstanding, Latency, Not Locally Relevant, Wrong Accent/Variant, Wrong Gender].
 
-4. SMART SEMANTIC ENDPOINTING & INTELLIGENT RECOVERY DECISION
+5. SMART SEMANTIC ENDPOINTING & INTELLIGENT RECOVERY DECISION
 When listening to the AI model's audio reply:
 - Judge whether the model's spoken turn is semantically complete ("turnComplete": true) or incomplete/trailed-off/cut-off/incoherent ("turnComplete": false).
 - If "turnComplete" is false (the model stopped mid-sentence, stalled, or went off-track), autonomously choose the smartest, most natural spoken recovery response in "nextUserScript" to best achieve the task objective: e.g., naturally prompt the model to finish its thought, gently clarify, or steer the conversation back to the core task goal.
 
-5. AUTONOMOUS ADAPTIVE EXECUTION RULES
+6. AUTONOMOUS ADAPTIVE EXECUTION RULES
 - For "false_alarm_barge_in": Prompt the model with open-ended questions that naturally elicit a longer multi-sentence explanation, AND provide an "autonomousAction" with type="false_alarm", a natural ElevenLabs non-verbal vocal tag in "ttsPrompt" (e.g., "[coughs]", "[clears throat]", "[sneezes]", "[chuckles]"), and triggerAfterSpeechSec (typically 3.5 to 5.5 seconds).
 - For "verbal_barge_in": Prompt the model to explain or list something, AND provide an "autonomousAction" with type="verbal_barge_in", a natural spoken interruption/correction phrase in the exact locked dialect in "ttsPrompt", and triggerAfterSpeechSec (typically 4.0 to 5.5 seconds).
 - For "endpointing_pause": Embed [PAUSE 3.5s] (between 2.5s and 4.5s) directly inside the spoken script where a natural mid-thought hesitation should happen.
 - For "standard": Set autonomousAction.type = "none".
 
-6. PERMANENT TASK-LOCK & UNIVERSAL LANGUAGE / ELEVENLABS RULES
+7. PERMANENT TASK-LOCK & UNIVERSAL LANGUAGE / ELEVENLABS RULES
 - PERMANENT TASK LOCK: On EVERY SINGLE TURN, stay 100% locked onto the extracted task topic, scenario objective, constraints, and SKILLS TESTED.
 - STRICT LANGUAGE & DIALECT LOCK: Speak EXCLUSIVELY in the exact language and regional dialect detected from the task card. Never drift into formal textbook register if colloquial dialect is requested.
-- ELEVENLABS-READY SPOKEN TEXT: Plain speakable text only (no emojis, markdown, quotation marks, parentheses, or stage directions). Spell numbers and abbreviations as naturally spoken. For Arabic, DO NOT use heavy or full Tashkeel—keep 95%+ of words clean and un-diacritized, using a single diacritic ONLY on a genuinely ambiguous homograph (e.g., إنتَ vs إنتِ, كَتَب vs كُتُب).
+- ELEVENLABS-READY SPOKEN TEXT: Plain speakable text only (no emojis, markdown, quotation marks, or parentheses). Spell numbers and abbreviations as naturally spoken. For Arabic, DO NOT use heavy or full Tashkeel—keep 95%+ of words clean and un-diacritized, using a single diacritic ONLY on a genuinely ambiguous homograph (e.g., إنتَ vs إنتِ, كَتَب vs كُتُب).
+- EXPRESSIVE AUDIO TAGS: Follow the per-turn instruction on whether ElevenLabs v3/v4 audio tags ([laughs], [chuckles], [coughs], [sighs], [sad], [excited], [whispers], [surprised], etc.) are enabled; when enabled, use them naturally ONLY when they fit the scenario emotion or requirements.
 - MODEL B FRESH OPENING: For Model B Turn 1, create a genuinely different opening structure and wording while preserving identical task objective, topic, difficulty, language, and dialect.
 - TRANSLATION RULE: If the spoken script is NOT Arabic, provide a natural Egyptian Arabic translation; if it IS Arabic, leave translation empty "".
 - Always output STRICT JSON only when JSON is requested, with no markdown fences.`;
 
     const appState = {
       activeModel: 'A',
+      userGender: 'm',
       listenerGender: 'm',
       taskProfile: null,
       openA: '',
@@ -736,6 +814,24 @@ When listening to the AI model's audio reply:
       cancelSegment: null,
       speechAbortToken: 0
     };
+
+    // -------------------- FIXED TOP CHROME HEIGHT SYNC --------------------
+    function syncTopChromeOffset() {
+      const chrome = document.getElementById('fixed-top-chrome');
+      if (chrome) {
+        document.body.style.paddingTop = `${chrome.offsetHeight}px`;
+      }
+    }
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => syncTopChromeOffset());
+      window.addEventListener('DOMContentLoaded', () => {
+        const chrome = document.getElementById('fixed-top-chrome');
+        if (chrome) ro.observe(chrome);
+        syncTopChromeOffset();
+      });
+    }
+    window.addEventListener('resize', syncTopChromeOffset);
 
     // -------------------- SAFE STORAGE & UI HELPERS --------------------
     function safeGetLS(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
@@ -807,9 +903,66 @@ When listening to the AI model's audio reply:
         error:     { cls: 'bg-rose-500', label: 'ERROR' }
       };
       const cfg = map[phase] || map.idle;
-      dot.className = `w-2.5 h-2.5 rounded-full shrink-0 ${cfg.cls}`;
+      dot.className = `w-2.5 h-2.5 rounded-full shrink-0 mt-1.5 ${cfg.cls}`;
       badge.textContent = cfg.label;
       if (phase !== 'error') clearErrorRetry();
+      syncTopChromeOffset();
+    }
+
+    // -------------------- FLOATING GENDER PROMPTS --------------------
+    function openUserGenderModal() {
+      const modal = document.getElementById('user-gender-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeUserGenderModal() {
+      const modal = document.getElementById('user-gender-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function confirmUserGenderAndAnalyze(g) {
+      setUserGender(g);
+      closeUserGenderModal();
+      await analyzeTaskAndStartModelA();
+    }
+
+    function showModelGenderFloat() {
+      const el = document.getElementById('model-gender-float');
+      const title = document.getElementById('model-gender-float-title');
+      if (title) {
+        const curT = appState.userTurns[appState.activeModel] || 1;
+        title.textContent = `Model ${appState.activeModel} (Turn ${curT}) — اللي بيرد عليك راجل ولا بنت؟`;
+      }
+      updateModelGenderFloatButtons();
+      el.classList.remove('hidden');
+    }
+
+    function hideModelGenderFloat() {
+      const el = document.getElementById('model-gender-float');
+      if (el) el.classList.add('hidden');
+    }
+
+    function updateModelGenderFloatButtons() {
+      const btnM = document.getElementById('float-btn-gender-m');
+      const btnF = document.getElementById('float-btn-gender-f');
+      if (!btnM || !btnF) return;
+      const baseOff = 'py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-white hover:text-zinc-950 border border-zinc-700 text-white text-xs font-extrabold flex items-center justify-center gap-2 transition';
+      const baseOn = 'py-2.5 px-3 rounded-xl bg-white text-zinc-950 border border-white text-xs font-extrabold flex items-center justify-center gap-2 transition';
+      btnM.className = appState.listenerGender === 'm' ? baseOn : baseOff;
+      btnF.className = appState.listenerGender === 'f' ? baseOn : baseOff;
+    }
+
+    function selectModelGenderFromFloat(g) {
+      const changed = appState.listenerGender !== g;
+      setListenerGender(g);
+      hideModelGenderFloat();
+      persistSessionSnapshot();
+      if (changed && (appState.specCtrl || appState.specResult)) {
+        abortSpeculativePreThink();
+      }
+      showToast(`تم تحديد صوت الموديل: ${g === 'f' ? 'بنت 👩' : 'راجل 👨'}`);
     }
 
     // -------------------- UNIVERSAL RETRY SYSTEM --------------------
@@ -823,6 +976,7 @@ When listening to the AI model's audio reply:
       if (appState.lastFailedAction) btn.classList.remove('hidden');
       else btn.classList.add('hidden');
       bar.classList.remove('hidden');
+      syncTopChromeOffset();
       showToast(`${stepTitle}: ${detailMessage || ''}`, true);
     }
 
@@ -830,6 +984,7 @@ When listening to the AI model's audio reply:
       appState.lastFailedAction = null;
       const bar = document.getElementById('error-retry-bar');
       if (bar) bar.classList.add('hidden');
+      syncTopChromeOffset();
     }
 
     async function retryLastFailedAction() {
@@ -886,6 +1041,7 @@ When listening to the AI model's audio reply:
         elevenKey: '',
         voiceId: '',
         elevenModel: 'eleven_v4_turbo',
+        enableAudioTags: true,
         outputDevice: '',
         stability: 0.50,
         similarity: 0.85,
@@ -926,6 +1082,9 @@ When listening to the AI model's audio reply:
       document.getElementById('cfg-11-key').value = s.elevenKey;
       document.getElementById('cfg-voice-id').value = s.voiceId;
       document.getElementById('cfg-11-model').value = s.elevenModel;
+      const tagsEnabled = s.enableAudioTags !== false;
+      document.getElementById('cfg-enable-audio-tags').checked = tagsEnabled;
+      document.getElementById('workspace-audio-tags-toggle').checked = tagsEnabled;
       document.getElementById('cfg-stability').value = Math.round((s.stability || 0.5) * 100);
       document.getElementById('val-stab').textContent = Number(s.stability || 0.5).toFixed(2);
       document.getElementById('cfg-similarity').value = Math.round((s.similarity || 0.85) * 100);
@@ -936,6 +1095,13 @@ When listening to the AI model's audio reply:
       document.getElementById('header-model-badge').textContent = s.model;
       document.getElementById('header-11-badge').textContent = s.elevenModel;
       document.getElementById('btn-speak-label').textContent = `نطق بصوتي (${s.elevenModel})`;
+    }
+
+    function toggleAudioTagsOption(enabled) {
+      document.getElementById('cfg-enable-audio-tags').checked = Boolean(enabled);
+      document.getElementById('workspace-audio-tags-toggle').checked = Boolean(enabled);
+      saveSettingsSilent();
+      showToast(enabled ? 'تم تفعيل تاجات المشاعر والأصوات (Tags) ✓' : 'تم إيقاف تاجات المشاعر والأصوات');
     }
 
     function buildSettingsFromUI() {
@@ -949,6 +1115,7 @@ When listening to the AI model's audio reply:
         elevenKey: document.getElementById('cfg-11-key').value.trim(),
         voiceId: document.getElementById('cfg-voice-id').value.trim(),
         elevenModel: document.getElementById('cfg-11-model').value,
+        enableAudioTags: document.getElementById('cfg-enable-audio-tags').checked,
         outputDevice: document.getElementById('cfg-output-device').value,
         stability: Number(document.getElementById('cfg-stability').value) / 100,
         similarity: Number(document.getElementById('cfg-similarity').value) / 100,
@@ -962,6 +1129,7 @@ When listening to the AI model's audio reply:
       const s = buildSettingsFromUI();
       safeSetLS(STORAGE_KEY, JSON.stringify(s));
       document.getElementById('cfg-model-custom').value = s.model;
+      document.getElementById('workspace-audio-tags-toggle').checked = s.enableAudioTags;
       document.getElementById('header-model-badge').textContent = s.model;
       document.getElementById('header-11-badge').textContent = s.elevenModel;
       document.getElementById('btn-speak-label').textContent = `نطق بصوتي (${s.elevenModel})`;
@@ -1019,6 +1187,18 @@ When listening to the AI model's audio reply:
         navWs.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition';
         enumerateAudioOutputs();
       }
+      syncTopChromeOffset();
+    }
+
+    function setUserGender(g) {
+      appState.userGender = g === 'f' ? 'f' : 'm';
+      ['m', 'f'].forEach(k => {
+        const b = document.getElementById(`btn-user-gender-${k}`);
+        if (!b) return;
+        b.className = k === appState.userGender
+          ? 'px-2 py-1 rounded-md bg-zinc-800 text-white font-semibold'
+          : 'px-2 py-1 rounded-md text-zinc-400';
+      });
     }
 
     function setListenerGender(g) {
@@ -1027,14 +1207,24 @@ When listening to the AI model's audio reply:
         const b = document.getElementById(`btn-gender-${k}`);
         if (!b) return;
         b.className = k === appState.listenerGender
-          ? 'px-2.5 py-1 rounded-md bg-zinc-800 text-white font-semibold'
-          : 'px-2.5 py-1 rounded-md text-zinc-400';
+          ? 'px-2 py-1 rounded-md bg-zinc-800 text-white font-semibold'
+          : 'px-2 py-1 rounded-md text-zinc-400';
       });
+      updateModelGenderFloatButtons();
     }
 
     function genderInstruction() {
-      const g = appState.listenerGender;
-      return `Listener grammatical gender: the AI voice being tested is ${g === 'f' ? 'female' : g === 'm' ? 'male' : 'unknown (use neutral phrasing)'}.`;
+      const ug = appState.userGender === 'f' ? 'FEMALE' : 'MALE';
+      const lg = appState.listenerGender === 'f' ? 'FEMALE' : appState.listenerGender === 'm' ? 'MALE' : 'UNKNOWN (use neutral phrasing)';
+      return `Speaker (User) grammatical gender: ${ug} (match self-reference verbs/adjectives like عايز/عايزة, محتاج/محتاجة). Listener (AI Model) voice gender: ${lg} (address the model accordingly like إنتَ/إنتِ, قولّي/قوليلي).`;
+    }
+
+    function audioTagsInstruction() {
+      const cfg = getSettings();
+      if (cfg.enableAudioTags !== false) {
+        return `ELEVENLABS EXPRESSIVE TAGS (ENABLED): When it genuinely matches the scenario's mood, emotional tone, or task instructions, naturally include ElevenLabs v3/v4 audio tags inside the script (e.g., [laughs], [chuckles], [coughs], [clears throat], [sighs], [sad], [excited], [surprised], [whispers], [hesitates]). Do not overuse or force tags when the turn is plain/neutral.`;
+      }
+      return `ELEVENLABS EXPRESSIVE TAGS (DISABLED): Do NOT include any bracketed audio/emotion tags like [laughs], [coughs], [sighs], or [sad] in the script (only [PAUSE Xs] if executionMode is endpointing_pause).`;
     }
 
     // -------------------- OFFICIAL 14 ERROR CLUSTERS TABLE & AUTO-TRACKING --------------------
@@ -1205,6 +1395,7 @@ When listening to the AI model's audio reply:
         const stripUrls = (arr) => arr.map(({ audioUrl, ...rest }) => rest);
         const snap = {
           activeModel: appState.activeModel,
+          userGender: appState.userGender,
           listenerGender: appState.listenerGender,
           taskProfile: appState.taskProfile,
           openA: appState.openA,
@@ -1227,6 +1418,7 @@ When listening to the AI model's audio reply:
         if (!snap || (!snap.transcripts?.A?.length && !snap.transcripts?.B?.length && !snap.taskProfile)) return;
 
         appState.activeModel = snap.activeModel || 'A';
+        appState.userGender = snap.userGender || 'm';
         appState.listenerGender = snap.listenerGender || 'm';
         appState.taskProfile = snap.taskProfile || null;
         appState.openA = snap.openA || '';
@@ -1249,6 +1441,7 @@ When listening to the AI model's audio reply:
           }
         }
 
+        setUserGender(appState.userGender);
         setListenerGender(appState.listenerGender);
         if (appState.taskProfile) renderTaskProfile();
         updateModelTabsUI();
@@ -1614,9 +1807,11 @@ When listening to the AI model's audio reply:
     }
 
     // -------------------- ELEVENLABS TTS, AUTONOMOUS ACTIONS & STT --------------------
-    function cleanTextForElevenLabs(text, modelId) {
+    function cleanTextForElevenLabs(text, modelId, allowTags = true) {
       let s = String(text || '').replace(/[*_#`~>|"]/g, '').replace(/\s+/g, ' ').trim();
-      if (!/v3|v4/i.test(modelId || '')) s = s.replace(/\[[^\]]{1,24}\]/g, '').trim();
+      if (!allowTags || !/v3|v4/i.test(modelId || '')) {
+        s = s.replace(/\[[^\]]{1,28}\]/g, '').replace(/\s+/g, ' ').trim();
+      }
       return s;
     }
 
@@ -1627,7 +1822,8 @@ When listening to the AI model's audio reply:
     async function requestVoice(text, isNonVerbal, signal) {
       const cfg = getSettings();
       if (!cfg.elevenKey || !cfg.voiceId) throw new Error('أدخل ElevenLabs API Key و Voice ID في الإعدادات أولاً');
-      const cleaned = isNonVerbal ? String(text || '').trim() : cleanTextForElevenLabs(text, cfg.elevenModel);
+      const allowTags = cfg.enableAudioTags !== false;
+      const cleaned = isNonVerbal ? String(text || '').trim() : cleanTextForElevenLabs(text, cfg.elevenModel, allowTags);
       if (!cleaned) return null;
 
       const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(cfg.voiceId)}?output_format=mp3_44100_128`, {
@@ -1839,7 +2035,7 @@ When listening to the AI model's audio reply:
 
     async function testClonedVoice() {
       saveSettingsSilent();
-      await speakTextElevenLabs('أهلاً بيك، ده اختبار سريع لصوتك المستنسخ على موديل إليفن لابس الجديد.', () => {
+      await speakTextElevenLabs('ده اختبار سريع لصوتك المستنسخ على موديل إليفن لابس الجديد.', () => {
         setLoopStatus('اختبار الصوت ناجح ✓', 'idle');
       });
     }
@@ -1960,6 +2156,7 @@ When listening to the AI model's audio reply:
           const shouldTransition = appState.autoTransitionAfterFinalRec;
           appState.finishModelAfterRec = false;
           appState.autoTransitionAfterFinalRec = false;
+          hideModelGenderFloat();
           cleanupMicStream();
           if (appState.recCancelled) {
             abortSpeculativePreThink();
@@ -1983,6 +2180,9 @@ When listening to the AI model's audio reply:
         appState.isRecording = true;
         appState.recStartTime = Date.now();
         document.getElementById('rec-dot').className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+
+        // Ask user on EVERY model reply whether the responding voice is male or female
+        showModelGenderFloat();
 
         const cfg = getSettings();
         const quick = cfg.endpointingMode === 'quick';
@@ -2112,6 +2312,7 @@ When listening to the AI model's audio reply:
       appState.finishModelAfterRec = false;
       appState.autoTransitionAfterFinalRec = false;
       appState.isRecording = false;
+      hideModelGenderFloat();
       abortSpeculativePreThink();
       try {
         if (appState.mediaRecorder && appState.mediaRecorder.state !== 'inactive') appState.mediaRecorder.stop();
@@ -2219,7 +2420,8 @@ When listening to the AI model's audio reply:
         appState.imageMime = mime;
         document.getElementById('screenshot-preview-img').src = dataUrl;
         document.getElementById('screenshot-preview-wrap').classList.remove('hidden');
-        await analyzeTaskAndStartModelA();
+        setLoopStatus('اختر جنسك (ولد / بنت) من النافذة للبدء في تحليل التاسك...', 'idle');
+        openUserGenderModal();
       } catch (e) {
         registerError('تعذر قراءة الصورة', e?.message || 'حاول اختيار الصورة مرة أخرى.', () => handleImageFile(file));
       } finally {
@@ -2247,10 +2449,12 @@ When listening to the AI model's audio reply:
       try {
         const prompt = `Analyze the attached Live S2S task screenshot carefully.
 ${genderInstruction()}
-CRITICAL UNIVERSAL LANGUAGE, EXECUTION MODE & ELEVENLABS RULES:
+${audioTagsInstruction()}
+CRITICAL UNIVERSAL LANGUAGE, NATURALNESS, EXECUTION MODE & ELEVENLABS RULES:
 - Auto-detect the EXACT target language, regional dialect/accent, and any bilingual/code-switching instructions from the screenshot.
 - Auto-detect "executionMode": "false_alarm_barge_in" | "verbal_barge_in" | "endpointing_pause" | "standard".
 - Lock 100% to that exact language & dialect. Never drift into formal textbook register if everyday spoken dialect is requested.
+- NATURAL HUMAN OPENING: NEVER use cliché AI-sounding titles like "يا فنان", "يا باشمهندس", "يا هندسة", "يا كبير", "يا معلم", "يا برنس" and RARELY open with generic greetings like "إزيك" or "أهلاً بيك". Go naturally and directly into the task topic like a real person.
 - Write clean, natural, ElevenLabs-ready spoken text (no emojis/markdown/quotes; if Arabic, NO heavy/full Tashkeel).
 - If executionMode is "false_alarm_barge_in" or "verbal_barge_in", design Turn 1 so the model gives a longer answer, AND fill "autonomousAction".
 
@@ -2415,10 +2619,9 @@ Return STRICT JSON with these exact keys:
           AudioVault.save(audioKey, blob)
         ]);
 
-        const aiGender = data.audioCheck?.detectedGender || 'unclear';
-        const resolvedGender = aiGender !== 'unclear' ? aiGender : (dsp.dspGender || 'unclear');
+        // Respect user's explicit model gender selection from the floating tab
+        const resolvedGender = appState.listenerGender === 'f' ? 'female' : appState.listenerGender === 'm' ? 'male' : (data.audioCheck?.detectedGender || dsp.dspGender || 'unclear');
 
-        // Auto-register DSP anomalies & AI detected clusters in background
         if (Array.isArray(dsp.anomalies)) {
           dsp.anomalies.forEach(a => recordAutoFlag(m, curTurn, a.label, a.timeLabel, a.detail));
         }
@@ -2441,14 +2644,6 @@ Return STRICT JSON with these exact keys:
           const cutLbl = formatTime(Math.floor(Math.max(0, (dsp.durationSec || 1) - 1)));
           dsp.anomalies.push({ label: 'Cut-Off Speech', category: 'aq', timeSec: Math.max(0, (dsp.durationSec || 1) - 1), timeLabel: cutLbl, detail: 'Incomplete / stalled reply' });
           recordAutoFlag(m, curTurn, 'Cut-Off Speech', cutLbl, 'Incomplete / stalled reply');
-        }
-
-        if (curTurn === 1 && (resolvedGender === 'male' || resolvedGender === 'female')) {
-          const targetG = resolvedGender === 'female' ? 'f' : 'm';
-          if (appState.listenerGender !== targetG) {
-            setListenerGender(targetG);
-            showToast(`تم اكتشاف صوت الموديل تلقائياً: ${resolvedGender === 'female' ? 'بنت' : 'راجل'}`);
-          }
         }
 
         await commitTurnAndSpeak(data.heard || '[audio reply]', data, {
@@ -2514,8 +2709,7 @@ Return STRICT JSON with these exact keys:
         }
         detectedClusters.forEach(cl => recordAutoFlag(m, curTurn, cl, formatTime(appState.timers[m]), 'AI final check'));
 
-        const aiGender = audioCheck?.detectedGender || 'unclear';
-        const resolvedGender = aiGender !== 'unclear' ? aiGender : (dsp.dspGender || 'unclear');
+        const resolvedGender = appState.listenerGender === 'f' ? 'female' : appState.listenerGender === 'm' ? 'male' : (audioCheck?.detectedGender || dsp.dspGender || 'unclear');
         const currentUserScript = document.getElementById('current-script-box').value.trim();
         const turnEvents = [...appState.currentTurnAutoEvents];
         appState.currentTurnAutoEvents = [];
@@ -2636,6 +2830,8 @@ Return STRICT JSON:
 - LOCKED LANGUAGE & DIALECT: ${p.language || 'Match task language'} — ${p.dialect || 'Match exact dialect'}
 - PRIORITY MATRIX: ${p.priorityMatrix || 'Follow guidelines'}
 - ${genderInstruction()}
+- ${audioTagsInstruction()}
+- NO AI CLICHÉS: NEVER say "يا فنان", "يا باشمهندس", "يا هندسة", "يا كبير", "يا معلم", "يا برنس" or generic greetings like "إزيك" unless strictly needed. Sound like a real human naturally continuing the conversation.
 - AUTO LANGUAGE RECOVERY RULE: If Model ${m} replied in a DIFFERENT language than "${p.language || 'the task language'}" (not expected code-switching), you MUST flag "Wrong Language" in "detectedClusters" AND naturally ask Model ${m} in "nextUserScript" to switch back to ${p.language || 'the required language'} (${p.dialect || ''}) right away. If you ALREADY asked it to switch back in a prior turn and it ignored you, also flag "Failed Correction".
 - STAY STRICTLY ON THIS TOPIC AND LANGUAGE/DIALECT. WRITE CLEAN, NATURAL ELEVENLABS-READY SPOKEN TEXT (no emojis/markdown/quotes; if Arabic, NO heavy/full Tashkeel).
 =====================================================
@@ -2665,7 +2861,7 @@ Model ${m}'s actual spoken reply is in the attached audio clip.
 4. INTELLIGENT NEXT-TURN DECISION ("nextUserScript"):
    - If Model ${m} spoke in the WRONG language, naturally ask it to switch back to the required task language & dialect!
    - Otherwise, if "turnComplete" is false, naturally prompt it to continue or steer back to the task objective.
-   - Otherwise, generate the next natural, adaptive spoken user turn locked to the task objective and dialect.
+   - Otherwise, generate the next natural, adaptive spoken user turn locked to the task objective and dialect (with natural ElevenLabs audio tags ONLY if enabled and fitting the scenario).
 5. Perform a brief perceptual audio check in "audioCheck" (gender, accentNote, perceptualIssues).
 6. If executionMode is "false_alarm_barge_in" or "verbal_barge_in" and another test is appropriate, populate "autonomousAction"; else type "none".
 7. Set "isCompletionGateMet": true ONLY if elapsed >= minDurationSec AND completed turns >= minUserTurns AND the task objective has been thoroughly tested (or if approaching maxDurationSec).
@@ -2803,9 +2999,11 @@ Return STRICT JSON:
 - TOPIC & OBJECTIVE: ${p.objectiveSummary || ''}
 - LOCKED LANGUAGE & DIALECT: ${p.language || ''} — ${p.dialect || ''}
 - ${genderInstruction()}
+- ${audioTagsInstruction()}
 ===========================
 CRITICAL RULES:
 - Model B Turn 1 MUST test the EXACT same task objective, topic, difficulty, language, and dialect, but use a GENUINELY DIFFERENT opening structure and wording from Model A's opening: "${appState.openA}". Do NOT just swap synonyms.
+- NEVER use cliché titles like "يا فنان", "يا باشمهندس", "يا هندسة", "يا كبير" and RARELY use generic greetings like "إزيك". Jump naturally into the topic.
 - If executionMode is "false_alarm_barge_in" or "verbal_barge_in", include an appropriate "autonomousAction". If executionMode is "endpointing_pause", you may embed [PAUSE 3.5s] mid-sentence.
 - Output clean, natural, ElevenLabs-ready spoken text (no emojis/markdown/quotes; if Arabic, NO heavy/full Tashkeel).
 
@@ -3182,6 +3380,8 @@ Flagged Error Cluster: ${checkedClustersSummary}`;
 
     async function resetCurrentTask() {
       stopAllAudioAndMic();
+      closeUserGenderModal();
+      hideModelGenderFloat();
       clearErrorRetry();
       clearArmedAction();
       appState.currentTurnAutoEvents = [];
@@ -3237,12 +3437,15 @@ Flagged Error Cluster: ${checkedClustersSummary}`;
 
     // -------------------- INIT --------------------
     loadSettingsToUI();
+    setUserGender(appState.userGender);
+    setListenerGender(appState.listenerGender);
     renderErrorClustersTable();
     syncRatingsUI();
     updateModelTabsUI();
     updateTimerUI();
     enumerateAudioOutputs();
     restoreSessionSnapshot();
+    syncTopChromeOffset();
     if (!getSettings().aiKey) {
       showToast('اضغط على "الإعدادات" لإدخال مفاتيح API لأول مرة');
     }
