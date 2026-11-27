@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0B0F17" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050B1A" />
   <title>Live S2S Arena Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,14 +19,10 @@
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
-            studio: {
-              950: '#0B0F17',
-              925: '#0E1420',
-              900: '#121826',
-              850: '#161E2E',
-              800: '#1C2538',
-              700: '#27334B',
-            }
+            studio: { 950:'#050B1A',925:'#08122A',900:'#0C1A38',850:'#112349',800:'#182F5C',700:'#264580' },
+            teal: { 50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',400:'#38bdf8',500:'#0ea5e9',600:'#0284c7',700:'#0369a1',800:'#075985',900:'#0c4a6e',950:'#082f49' },
+            indigo: { 50:'#fff7ed',100:'#ffedd5',200:'#fed7aa',300:'#fdba74',400:'#fb923c',500:'#f97316',600:'#ea580c',700:'#c2410c',800:'#9a3412',900:'#7c2d12',950:'#431407' },
+            slate: { 50:'#f4f8ff',100:'#e6eefb',200:'#d2defa',300:'#aebfe3',400:'#8a9cc4',500:'#6a7da8',600:'#4c5e86',700:'#34436a',800:'#212d4d',900:'#141d36',950:'#0a1022' },
           }
         }
       }
@@ -40,15 +36,15 @@
       scroll-behavior: smooth;
     }
     body {
-      background-color: #0B0F17;
+      background-color: #050B1A;
       color: #E2E8F0;
       font-family: 'IBM Plex Sans Arabic', 'Plus Jakarta Sans', sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #27334B; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #384969; }
+    ::-webkit-scrollbar-thumb { background: #264580; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #34609c; }
 
     /* Equalizer & Attention Animations */
     @keyframes eqPulse {
@@ -62,8 +58,8 @@
     .speaking .eq-bar:nth-child(4n) { animation-delay: 0.36s; }
 
     @keyframes tealRing {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.55); }
-      50% { box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.16); }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.55); }
+      50% { box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.16); }
     }
     .gender-attention {
       animation: tealRing 1.5s infinite ease-in-out;
@@ -77,11 +73,11 @@
                   transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .stage-card[data-expanded="true"] {
-      border-color: rgba(20, 184, 166, 0.32);
-      box-shadow: 0 18px 45px -24px rgba(20, 184, 166, 0.22);
+      border-color: rgba(56, 189, 248, 0.32);
+      box-shadow: 0 18px 45px -24px rgba(56, 189, 248, 0.22);
     }
     .stage-card[data-expanded="false"] {
-      border-color: rgba(30, 41, 59, 0.9);
+      border-color: rgba(38, 69, 128, 0.6);
       box-shadow: none;
     }
     .stage-body-wrap {
@@ -130,7 +126,88 @@
       transform: scale(0.98);
     }
   </style>
-</head>
+
+  <style id="ux-improvements">
+    /* ===== UX improvements (desktop-first, mobile-safe) ===== */
+    /* 1. Readable text: lift the tiniest sizes and improve contrast on dark backgrounds */
+    html body .text-\[10px\] { font-size: 12px; line-height: 1.5; }
+    html body .text-\[11px\] { font-size: 12.5px; line-height: 1.55; }
+    html body .text-slate-500 { color: #94a3b8; }
+    html body .text-slate-400 { color: #b0bdd0; }
+    /* 2. Comfortable click / touch targets */
+    html body button, html body [role="button"], html body summary { min-height: 36px; }
+    html body input[type="checkbox"], html body input[type="radio"] { min-width: 18px; min-height: 18px; }
+    @media (pointer: coarse), (max-width: 639px) {
+      html body button, html body [role="button"], html body summary { min-height: 44px; }
+      html body input:not([type="checkbox"]):not([type="radio"]), html body select { min-height: 44px; }
+      html body input, html body select, html body textarea { font-size: 16px; } /* no iOS auto-zoom on focus */
+    }
+    html body input, html body select, html body textarea { min-width: 0; max-width: 100%; }
+    html body .stage-body-inner > *, html body .stage-body-inner .grid > * { min-width: 0; }
+    html body .stage-body-wrap { grid-template-columns: minmax(0, 1fr); }
+    html body .stage-body-inner { min-width: 0; }
+    /* 3. Toast sits under the top bar, never covers fields or action buttons, and never blocks clicks */
+    html body #toast { top: calc(var(--chrome-height, 120px) + 10px); bottom: auto; pointer-events: none; }
+    /* 4. Compact top bar after scrolling (small screens only). Gender bar stays visible if it needs attention. */
+    @media (max-width: 639px) {
+      #fixed-top-chrome.chrome-compact #pinned-gender-bar:not(.needs-attention) { display: none; }
+      #fixed-top-chrome.chrome-compact #live-status-hud { padding-top: 6px; padding-bottom: 6px; }
+      #fixed-top-chrome.chrome-compact #hud-status-text { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+      html body #fixed-top-chrome #pinned-gender-bar { padding-left: 8px; padding-right: 8px; }
+      html body #pinned-gender-bar > div { gap: 4px 8px; flex-wrap: nowrap; }
+      html body #pinned-gender-bar > div > div { gap: 6px; padding-left: 0; padding-right: 0; }
+      html body #pinned-gender-bar .text-\[11px\] { font-size: 12px; white-space: nowrap; }
+      html body #pinned-gender-bar button { padding-left: 10px; padding-right: 10px; min-height: 40px; }
+    }
+    /* 5. Sticky action controls for the live conversation (listening buttons stay reachable) */
+    html body #stage-console { overflow: clip; } /* clip (not hidden) keeps the same look but lets sticky work */
+    html body #stage-console .stage-body-inner { overflow: clip; }
+    .sticky-actions {
+      position: sticky; bottom: 0; z-index: 30;
+      background: linear-gradient(to top, #08122A 82%, rgba(8,18,42,0));
+      padding: 10px 0 6px; margin-top: 6px;
+    }
+    /* 6. Keyboard focus is clearly visible */
+    html body button:focus-visible, html body input:focus-visible, html body a:focus-visible { outline: 2px solid #7dd3fc; outline-offset: 2px; }
+  </style>
+<style id="v4-ocean">
+:root{--e:cubic-bezier(.22,1,.36,1)}
+body{background:radial-gradient(700px 500px at 15% 10%,rgba(56,189,248,.16),transparent 60%),radial-gradient(600px 500px at 90% 30%,rgba(99,102,241,.15),transparent 60%),radial-gradient(700px 500px at 50% 110%,rgba(249,115,22,.11),transparent 60%),#050B1A;background-attachment:fixed}
+body::before,body::after{content:'';position:fixed;pointer-events:none;border-radius:50%;z-index:0;will-change:transform}
+body::before{width:520px;height:520px;left:5%;top:8%;background:radial-gradient(closest-side,rgba(56,189,248,.16),transparent);animation:oDrift 18s ease-in-out infinite alternate}
+body::after{width:460px;height:460px;right:3%;top:40%;background:radial-gradient(closest-side,rgba(99,102,241,.18),transparent);animation:oDrift 23s ease-in-out infinite alternate-reverse}
+@keyframes oDrift{to{transform:translate3d(90px,60px,0)}}
+body>*{position:relative;z-index:1}
+/* glass */
+#live-status-hud{background:rgba(8,18,42,.7)!important;backdrop-filter:blur(16px) saturate(1.4);position:relative}
+#live-status-hud::after{content:"";position:absolute;inset:auto 0 0 0;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.6),rgba(249,115,22,.4),transparent)}
+.stage-card{background:linear-gradient(180deg,rgba(17,35,73,.55),rgba(12,26,56,.7))!important;backdrop-filter:blur(10px) saturate(1.2)}
+.stage-card[data-expanded="true"]{border-color:rgba(56,189,248,.42);box-shadow:0 24px 60px -28px rgba(56,189,248,.5),inset 0 1px 0 rgba(255,255,255,.06)}
+.stage-card[data-expanded="true"] .stage-body-inner{animation:oIn .5s var(--e) both}
+@keyframes oIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#hud-dot.animate-pulse,#rec-dot.animate-pulse{animation:oHalo 1.8s ease-out infinite}
+@keyframes oHalo{0%{box-shadow:0 0 0 0 rgba(56,189,248,.55)}100%{box-shadow:0 0 0 9px rgba(56,189,248,0)}}
+/* buttons */
+html body button.bg-teal-500{background-image:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;box-shadow:0 8px 22px -10px rgba(56,189,248,.7);transition:transform .18s var(--e),box-shadow .18s var(--e),filter .18s}
+html body button.bg-teal-500:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.1);box-shadow:0 12px 26px -10px rgba(56,189,248,.85)}
+html body button{transition:transform .15s var(--e),background-color .2s,border-color .2s,color .2s,box-shadow .2s}
+html body button:hover:not(:disabled){border-color:rgba(125,211,252,.4)}
+html body input:focus,html body textarea:focus,html body select:focus{outline:none;border-color:rgba(56,189,248,.65)!important;box-shadow:0 0 0 3px rgba(56,189,248,.18)}
+#mic-level-bar{background-image:linear-gradient(90deg,#38bdf8,#f97316);background-color:transparent;border-radius:9999px;box-shadow:0 0 10px rgba(56,189,248,.45)}
+.eq-bar{background-image:linear-gradient(to top,#38bdf8,#f97316)!important;border-radius:3px}
+.msg-animate{animation-duration:.28s}
+::selection{background:rgba(56,189,248,.4);color:#fff}
+/* icon set "Ripple": duotone soft fill + 1.8 stroke + orange accent dot */
+svg .ic-f{fill:currentColor;fill-opacity:.2;stroke:none}
+svg .ic-d{fill:#fb923c;stroke:none}
+button svg{transition:transform .22s var(--e)}
+button:hover:not(:disabled) svg:not(.stage-chevron){transform:scale(1.1) rotate(-3deg)}
+#nav-workspace svg,button svg{filter:drop-shadow(0 2px 5px rgba(56,189,248,.35))}
+/* failsafe: if IntersectionObserver never marks a card in-view, reveal it anyway after 0.7s */
+.scroll-reveal:not(.in-view){animation:oFailsafe .45s var(--e) .7s forwards}
+@keyframes oFailsafe{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.scroll-reveal{opacity:1;transform:none}}
+</style></head>
 <body class="min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-teal-500/30 selection:text-teal-100">
 
   <!-- Toast Notification -->
@@ -145,9 +222,7 @@
     <header class="bg-studio-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between gap-3">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-xl bg-teal-500/15 border border-teal-500/35 flex items-center justify-center text-teal-400 shrink-0">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-          </svg>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" d="M9 6a3 3 0 016 0v5a3 3 0 01-6 0z"/><path d="M9 6a3 3 0 016 0v5a3 3 0 01-6 0z"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/></svg>
         </div>
         <span class="font-bold text-sm tracking-tight text-slate-100 hidden sm:inline">Live S2S Arena Studio</span>
       </div>
@@ -212,11 +287,11 @@
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <button type="button" onclick="retryLastFailedAction()" id="btn-universal-retry" class="px-3.5 py-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 01-12.8 5.3M4.5 12a7.5 7.5 0 0112.8-5.3"/><path d="M17.5 3v4h-4M6.5 21v-4h4"/><circle class="ic-d" cx="12" cy="12" r="1.2"/></svg>
             <span>إعادة المحاولة</span>
           </button>
           <button type="button" onclick="clearErrorRetry()" class="px-2.5 py-1.5 rounded-xl bg-studio-900 hover:bg-studio-800 border border-slate-700 text-slate-300 hover:text-white text-xs transition" title="إخفاء">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>
           </button>
         </div>
       </div>
@@ -228,24 +303,25 @@
   <!-- ===================================================================== -->
   <main id="view-workspace" class="flex-1 w-full max-w-5xl mx-auto px-3.5 sm:px-5 py-4 space-y-4">
 
-    <!-- 3-STEP INTERACTIVE STAGE STEPPER -->
-    <div class="scroll-reveal bg-studio-900/90 border border-slate-800/90 rounded-2xl p-2 flex items-center justify-between gap-2">
+    <!-- 3-STEP INTERACTIVE STAGE STEPPER (FULL READABLE LABELS, ZERO TRUNCATION) -->
+    <div class="scroll-reveal bg-studio-900/90 border border-slate-800/90 rounded-2xl p-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
       <div class="grid grid-cols-3 gap-1.5 flex-1">
-        <button type="button" onclick="activateStage('capture', true)" id="stepper-capture" class="px-3 py-2 rounded-xl text-xs font-bold bg-teal-500/15 border border-teal-500/40 text-teal-300 flex items-center justify-center gap-2 transition">
+        <button type="button" onclick="activateStage('capture', true)" id="stepper-capture" class="px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold bg-teal-500/15 border border-teal-500/40 text-teal-300 flex items-center justify-center gap-1.5 transition">
           <span class="w-5 h-5 rounded-full bg-teal-500 text-slate-950 font-mono text-[11px] font-bold flex items-center justify-center shrink-0">1</span>
-          <span class="truncate">التقاط التاسك</span>
+          <span class="whitespace-nowrap">التاسك</span>
         </button>
-        <button type="button" onclick="activateStage('console', true)" id="stepper-console" class="px-3 py-2 rounded-xl text-xs font-semibold bg-studio-950/60 border border-slate-800 text-slate-400 hover:text-slate-100 flex items-center justify-center gap-2 transition">
+        <button type="button" onclick="activateStage('console', true)" id="stepper-console" class="px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-semibold bg-studio-950/60 border border-slate-800 text-slate-400 hover:text-slate-100 flex items-center justify-center gap-1.5 transition">
           <span class="w-5 h-5 rounded-full bg-studio-800 text-slate-300 font-mono text-[11px] font-bold flex items-center justify-center shrink-0">2</span>
-          <span class="truncate">المحادثة الحية</span>
+          <span class="whitespace-nowrap">المحادثة</span>
         </button>
-        <button type="button" onclick="activateStage('rating', true)" id="stepper-rating" class="px-3 py-2 rounded-xl text-xs font-semibold bg-studio-950/60 border border-slate-800 text-slate-400 hover:text-slate-100 flex items-center justify-center gap-2 transition">
+        <button type="button" onclick="activateStage('rating', true)" id="stepper-rating" class="px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-semibold bg-studio-950/60 border border-slate-800 text-slate-400 hover:text-slate-100 flex items-center justify-center gap-1.5 transition">
           <span class="w-5 h-5 rounded-full bg-studio-800 text-slate-300 font-mono text-[11px] font-bold flex items-center justify-center shrink-0">3</span>
-          <span class="truncate">التقييم والـ Rationale</span>
+          <span class="whitespace-nowrap">التقييم</span>
         </button>
       </div>
-      <button type="button" onclick="resetCurrentTask()" class="px-3 py-2 rounded-xl bg-studio-850 hover:bg-studio-800 border border-slate-700/80 text-[11px] font-semibold text-slate-300 shrink-0 transition">
-        تاسك جديد
+      <button type="button" onclick="resetCurrentTask()" class="px-3.5 py-2 rounded-xl bg-studio-850 hover:bg-studio-800 border border-slate-700/80 text-xs font-semibold text-slate-200 flex items-center justify-center gap-1.5 shrink-0 transition">
+        <svg class="w-3.5 h-3.5 text-teal-400 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>
+        <span class="whitespace-nowrap">تاسك جديد</span>
       </button>
     </div>
 
@@ -255,19 +331,19 @@
     <section id="stage-capture" data-expanded="true" class="stage-card scroll-reveal bg-studio-900 border border-slate-800/90 rounded-2xl overflow-hidden">
       <!-- Stage 1 Header (Always clickable to Minimize / Maximize) -->
       <button type="button" onclick="toggleStage('capture')" class="w-full px-4 py-3.5 bg-studio-925/80 hover:bg-studio-850/70 flex items-center justify-between gap-3 text-right transition">
-        <div class="flex items-center gap-3 min-w-0">
-          <span id="stage-dot-capture" class="w-7 h-7 rounded-xl bg-teal-500/15 border border-teal-500/40 text-teal-300 font-mono text-xs font-bold flex items-center justify-center shrink-0">1</span>
-          <div class="min-w-0">
+        <div class="flex items-start gap-3 min-w-0 flex-1">
+          <span id="stage-dot-capture" class="w-7 h-7 rounded-xl bg-teal-500/15 border border-teal-500/40 text-teal-300 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+          <div class="min-w-0 flex-1">
             <div class="text-sm font-bold text-slate-100 flex items-center gap-2 flex-wrap">
               <span>المرحلة 1: التقاط وتحليل التاسك</span>
               <span id="stage-badge-capture" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-teal-500/15 text-teal-300 border border-teal-500/30">المرحلة النشطة</span>
             </div>
-            <div id="stage-summary-capture" class="text-[11px] text-slate-400 truncate mt-0.5">صوّر الشاشة بالكاميرا أو ارفع صورة أو الصق عبر Ctrl+V للبدء الفوري</div>
+            <div id="stage-summary-capture" class="text-[11px] text-slate-400 leading-relaxed whitespace-normal break-words mt-1">صوّر الشاشة بالكاميرا أو ارفع صورة أو الصق عبر Ctrl+V للبدء الفوري</div>
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0 text-slate-400">
           <span class="stage-toggle-label text-[11px] font-semibold hidden sm:inline">تصغير</span>
-          <svg class="stage-chevron w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          <svg class="stage-chevron w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
         </div>
       </button>
 
@@ -282,11 +358,11 @@
 
               <div class="space-y-2.5">
                 <button type="button" onclick="document.getElementById('camera-input').click()" class="w-full py-3 px-4 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-teal-500/10">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" d="M3.5 11a4 4 0 014-4h9a4 4 0 014 4v5a4 4 0 01-4 4h-9a4 4 0 01-4-4z"/><path d="M3.5 11a4 4 0 014-4h9a4 4 0 014 4v5a4 4 0 01-4 4h-9a4 4 0 01-4-4z"/><path d="M9 7l1-1.7a1 1 0 01.9-.5h2.2a1 1 0 01.9.5L15 7"/><circle cx="12" cy="13.5" r="3"/><circle class="ic-d" cx="17.2" cy="10.6" r="0.9"/></svg>
                   <span>تصوير التاسك بالكاميرا</span>
                 </button>
                 <button type="button" onclick="document.getElementById('gallery-input').click()" class="w-full py-2.5 px-4 rounded-xl bg-studio-925 hover:bg-studio-850 border border-slate-800 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition">
-                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" d="M3.5 8a4 4 0 014-4h9a4 4 0 014 4v8a4 4 0 01-4 4h-9a4 4 0 01-4-4z"/><path d="M3.5 8a4 4 0 014-4h9a4 4 0 014 4v8a4 4 0 01-4 4h-9a4 4 0 01-4-4z"/><path d="M4 17l4.3-4.3a1.6 1.6 0 012.3 0L15 17M13.2 15.2l1.1-1.1a1.6 1.6 0 012.3 0L20 17.4"/><circle class="ic-d" cx="9" cy="9" r="1.4"/></svg>
                   <span>اختيار صورة أو لصق Ctrl+V</span>
                 </button>
               </div>
@@ -319,10 +395,10 @@
               </div>
 
               <div class="space-y-1.5 pt-1">
-                <div class="flex justify-between gap-2"><span class="text-slate-400">السيناريو:</span><span id="meta-title" class="text-slate-100 font-semibold text-left">—</span></div>
-                <div class="flex justify-between gap-2"><span class="text-slate-400">وضع التنفيذ:</span><span id="meta-exec-mode" class="font-mono text-teal-400 text-left text-[11px]">—</span></div>
-                <div class="flex justify-between gap-2"><span class="text-slate-400">الأولوية:</span><span id="meta-priority" class="font-mono text-slate-300 text-left text-[11px]">—</span></div>
-                <div class="flex justify-between gap-2"><span class="text-slate-400">المدة وأقل أدوار:</span><span class="font-mono text-slate-200 text-left"><span id="meta-duration">—</span> · <span id="meta-minturns">—</span></span></div>
+                <div class="flex flex-wrap justify-between gap-2"><span class="text-slate-400 shrink-0">السيناريو:</span><span id="meta-title" class="text-slate-100 font-semibold text-left break-words">—</span></div>
+                <div class="flex flex-wrap justify-between gap-2"><span class="text-slate-400 shrink-0">وضع التنفيذ:</span><span id="meta-exec-mode" class="font-mono text-teal-400 text-left text-[11px] break-words">—</span></div>
+                <div class="flex flex-wrap justify-between gap-2"><span class="text-slate-400 shrink-0">الأولوية:</span><span id="meta-priority" class="font-mono text-slate-300 text-left text-[11px] break-words">—</span></div>
+                <div class="flex flex-wrap justify-between gap-2"><span class="text-slate-400 shrink-0">المدة وأقل أدوار:</span><span class="font-mono text-slate-200 text-left"><span id="meta-duration">—</span> · <span id="meta-minturns">—</span></span></div>
               </div>
 
               <div id="meta-objective-wrap" class="hidden pt-2 border-t border-slate-800/90">
@@ -341,19 +417,19 @@
     <section id="stage-console" data-expanded="false" class="stage-card scroll-reveal bg-studio-900 border border-slate-800/90 rounded-2xl overflow-hidden">
       <!-- Stage 2 Header -->
       <button type="button" onclick="toggleStage('console')" class="w-full px-4 py-3.5 bg-studio-925/80 hover:bg-studio-850/70 flex items-center justify-between gap-3 text-right transition">
-        <div class="flex items-center gap-3 min-w-0">
-          <span id="stage-dot-console" class="w-7 h-7 rounded-xl bg-studio-850 border border-slate-700 text-slate-400 font-mono text-xs font-bold flex items-center justify-center shrink-0">2</span>
-          <div class="min-w-0">
+        <div class="flex items-start gap-3 min-w-0 flex-1">
+          <span id="stage-dot-console" class="w-7 h-7 rounded-xl bg-studio-850 border border-slate-700 text-slate-400 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+          <div class="min-w-0 flex-1">
             <div class="text-sm font-bold text-slate-100 flex items-center gap-2 flex-wrap">
               <span>المرحلة 2: المحادثة الحية (Model A & Model B)</span>
               <span id="stage-badge-console" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-studio-950 text-slate-400 border border-slate-800">مصغّرة</span>
             </div>
-            <div id="stage-summary-console" class="text-[11px] text-slate-400 truncate mt-0.5">ستفتح تلقائياً فور تحليل صورة التاسك وتجهيز Turn 1</div>
+            <div id="stage-summary-console" class="text-[11px] text-slate-400 leading-relaxed whitespace-normal break-words mt-1">ستفتح تلقائياً فور تحليل صورة التاسك وتجهيز Turn 1</div>
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0 text-slate-400">
           <span class="stage-toggle-label text-[11px] font-semibold hidden sm:inline">توسيع</span>
-          <svg class="stage-chevron w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          <svg class="stage-chevron w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
         </div>
       </button>
 
@@ -412,7 +488,7 @@
                 <p class="text-[11px] text-slate-400">جهّز Model B على اللابتوب أولاً، وعندما يصبح جاهزاً للاستماع اضغط ابدأ.</p>
               </div>
               <button type="button" onclick="startModelBConversationNow()" class="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition">
-                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" style="fill-opacity:1" d="M9 6.3a1 1 0 011.5-.85l7.4 4.7a1 1 0 010 1.7l-7.4 4.7A1 1 0 019 15.7z" transform="translate(-.5 1.2)"/></svg>
                 <span>ابدأ المحادثة مع Model B الآن</span>
               </button>
             </div>
@@ -436,7 +512,7 @@
 
               <div class="flex items-center justify-between gap-3 pt-1">
                 <button type="button" onclick="speakCurrentScript()" id="btn-speak" class="px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold flex items-center gap-2 transition">
-                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" style="fill-opacity:1" d="M9 6.3a1 1 0 011.5-.85l7.4 4.7a1 1 0 010 1.7l-7.4 4.7A1 1 0 019 15.7z" transform="translate(-.5 1.2)"/></svg>
                   <span id="btn-speak-label">نطق بصوتي (eleven_v4_turbo)</span>
                 </button>
 
@@ -481,15 +557,15 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <button type="button" onclick="startModelRecording()" id="btn-start-listen" class="py-2.5 px-3 rounded-xl bg-studio-850 hover:bg-studio-800 border border-slate-700 text-slate-100 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                  <svg class="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"/></svg>
+                  <svg class="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" d="M9 6a3 3 0 016 0v5a3 3 0 01-6 0z"/><path d="M9 6a3 3 0 016 0v5a3 3 0 01-6 0z"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/></svg>
                   <span>ابدأ الاستماع</span>
                 </button>
                 <button type="button" onclick="finishRecordingAndReply()" id="btn-finish-listen" disabled class="py-2.5 px-3 rounded-xl bg-teal-500 disabled:bg-studio-850 disabled:text-slate-500 hover:bg-teal-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" d="M20.5 3.5l-6.3 17-3-7.2-7.2-3z"/><path d="M20.5 3.5l-6.3 17-3-7.2-7.2-3zM11.2 13.3l4.4-4.4"/></svg>
                   <span>رد عليه الآن</span>
                 </button>
                 <button type="button" onclick="finishRecordingAndCloseModel(false)" id="btn-finish-close-model" disabled class="py-2.5 px-3 rounded-xl bg-studio-850 disabled:opacity-40 hover:bg-studio-800 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"/></svg>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" d="M7.5 6.5h9a1 1 0 011 1v9a1 1 0 01-1 1h-9a1 1 0 01-1-1v-9a1 1 0 011-1z"/><path d="M8 6.5h8a1.5 1.5 0 011.5 1.5v8a1.5 1.5 0 01-1.5 1.5H8A1.5 1.5 0 016.5 16V8A1.5 1.5 0 018 6.5z"/></svg>
                   <span>احفظ آخر رد وأنهِ</span>
                 </button>
               </div>
@@ -515,7 +591,7 @@
             <!-- Step Timing Diagnostics -->
             <details class="bg-studio-925 rounded-xl border border-slate-800/90 p-3 text-xs">
               <summary class="cursor-pointer font-semibold text-slate-400 hover:text-slate-200 select-none flex items-center gap-2 transition">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" d="M12 3.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17z"/><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/><circle class="ic-d" cx="12" cy="12" r="0.9"/></svg>
                 <span>توقيت الخطوات (Diagnostics)</span>
               </summary>
               <ol id="timing-list" class="space-y-1 pt-2.5 text-slate-400 font-mono text-[11px]"></ol>
@@ -532,20 +608,20 @@
     <section id="stage-rating" data-expanded="false" class="stage-card scroll-reveal bg-studio-900 border border-slate-800/90 rounded-2xl overflow-hidden">
       <!-- Stage 3 Header -->
       <button type="button" onclick="toggleStage('rating')" class="w-full px-4 py-3.5 bg-studio-925/80 hover:bg-studio-850/70 flex items-center justify-between gap-3 text-right transition">
-        <div class="flex items-center gap-3 min-w-0">
-          <span id="stage-dot-rating" class="w-7 h-7 rounded-xl bg-studio-850 border border-slate-700 text-slate-400 font-mono text-xs font-bold flex items-center justify-center shrink-0">3</span>
-          <div class="min-w-0">
+        <div class="flex items-start gap-3 min-w-0 flex-1">
+          <span id="stage-dot-rating" class="w-7 h-7 rounded-xl bg-studio-850 border border-slate-700 text-slate-400 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+          <div class="min-w-0 flex-1">
             <div class="text-sm font-bold text-slate-100 flex items-center gap-2 flex-wrap">
               <span>المرحلة 3: التقييم النهائي والـ Rationale</span>
               <span id="stage-badge-rating" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-studio-950 text-slate-400 border border-slate-800">مصغّرة</span>
               <span id="auto-issues-count-badge" class="font-mono text-[10px] px-2 py-0.5 rounded-md bg-studio-950 border border-slate-800 text-slate-400">0 auto-flags</span>
             </div>
-            <div id="stage-summary-rating" class="text-[11px] text-slate-400 truncate mt-0.5">ستفتح تلقائياً بعد إنهاء Model B لتقييم المحادثتين وكتابة الـ Rationale</div>
+            <div id="stage-summary-rating" class="text-[11px] text-slate-400 leading-relaxed whitespace-normal break-words mt-1">ستفتح تلقائياً بعد إنهاء Model B لتقييم المحادثتين وكتابة الـ Rationale</div>
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0 text-slate-400">
           <span class="stage-toggle-label text-[11px] font-semibold hidden sm:inline">توسيع</span>
-          <svg class="stage-chevron w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          <svg class="stage-chevron w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>
         </div>
       </button>
 
@@ -555,7 +631,7 @@
           <div class="p-4 border-t border-slate-800/80 space-y-4 text-xs" dir="ltr">
             <!-- Smart Auto-Evaluate Button -->
             <button type="button" onclick="autoEvaluateAndGenerateRationale()" id="btn-auto-eval" class="w-full py-3 px-4 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-teal-500/10">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path class="ic-f" d="M11 4l1.9 5.1L18 11l-5.1 1.9L11 18l-1.9-5.1L4 11l5.1-1.9z"/><path d="M11 4l1.9 5.1L18 11l-5.1 1.9L11 18l-1.9-5.1L4 11l5.1-1.9z"/><path d="M18.5 15.5v4M16.5 17.5h4"/><circle class="ic-d" cx="19" cy="5" r="1"/></svg>
               <span>Auto-Evaluate Both Models & Write Rationale</span>
             </button>
 
@@ -1026,13 +1102,13 @@ Classify "turnState" accurately into ONE of 3 states:
         if (stepBtn) {
           const numEl = stepBtn.querySelector('span:first-child');
           if (state === 'active') {
-            stepBtn.className = 'px-3 py-2 rounded-xl text-xs font-bold bg-teal-500/15 border border-teal-500/40 text-teal-300 flex items-center justify-center gap-2 transition';
+            stepBtn.className = 'px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold bg-teal-500/15 border border-teal-500/40 text-teal-300 flex items-center justify-center gap-1.5 transition';
             if (numEl) numEl.className = 'w-5 h-5 rounded-full bg-teal-500 text-slate-950 font-mono text-[11px] font-bold flex items-center justify-center shrink-0';
           } else if (state === 'done') {
-            stepBtn.className = 'px-3 py-2 rounded-xl text-xs font-semibold bg-studio-925 border border-teal-500/25 text-slate-200 hover:border-teal-500/50 flex items-center justify-center gap-2 transition';
+            stepBtn.className = 'px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-semibold bg-studio-925 border border-teal-500/25 text-slate-200 hover:border-teal-500/50 flex items-center justify-center gap-1.5 transition';
             if (numEl) numEl.className = 'w-5 h-5 rounded-full bg-teal-500/20 text-teal-300 font-mono text-[11px] font-bold flex items-center justify-center shrink-0';
           } else {
-            stepBtn.className = 'px-3 py-2 rounded-xl text-xs font-semibold bg-studio-950/60 border border-slate-800 text-slate-400 hover:text-slate-100 flex items-center justify-center gap-2 transition';
+            stepBtn.className = 'px-2 sm:px-3 py-2 rounded-xl text-[11px] sm:text-xs font-semibold bg-studio-950/60 border border-slate-800 text-slate-400 hover:text-slate-100 flex items-center justify-center gap-1.5 transition';
             if (numEl) numEl.className = 'w-5 h-5 rounded-full bg-studio-800 text-slate-300 font-mono text-[11px] font-bold flex items-center justify-center shrink-0';
           }
         }
@@ -1615,8 +1691,8 @@ Classify "turnState" accurately into ONE of 3 states:
               const checkedB = appState.errorClusters.B.includes(name);
               const safeName = escapeHtml(name).replace(/'/g, "\\'");
               return `
-                <div class="grid grid-cols-[1fr_28px_28px] items-center gap-1 py-0.5 hover:bg-studio-850/70 rounded px-1">
-                  <span class="text-slate-300 truncate" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
+                <div class="grid grid-cols-[1fr_28px_28px] items-center gap-1 py-1 hover:bg-studio-850/70 rounded px-1">
+                  <span class="text-slate-300 leading-snug break-words" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
                   <div class="flex justify-center">
                     <input type="checkbox" ${checkedA ? 'checked' : ''} onchange="toggleErrorCluster('A', '${safeName}', this.checked)" class="w-3.5 h-3.5 rounded bg-studio-950 border-slate-700 accent-teal-500 cursor-pointer">
                   </div>
@@ -1859,11 +1935,16 @@ Classify "turnState" accurately into ONE of 3 states:
         const sortedRms = [...frameRms].sort((a, b) => a - b);
         const noiseFloor = sortedRms[Math.floor(sortedRms.length * 0.15)] || 0.0001;
         const speechPeak = sortedRms[Math.floor(sortedRms.length * 0.85)] || 0.001;
-        const speechThr = Math.max(0.015, noiseFloor * 2.6);
+        // v5: room noise measured live while recording is not counted as an audio problem
+        let roomNoise = 0;
+        try {
+          if (appState.liveNoiseAt && (Date.now() - appState.liveNoiseAt) < 120000) roomNoise = Math.min(0.05, Number(appState.liveNoiseFloor) || 0);
+        } catch (_) { roomNoise = 0; }
+        const speechThr = Math.max(0.015, noiseFloor * 2.6, roomNoise * 2.2);
 
         if (speechPeak > 0.002) {
           result.snrDb = Math.max(0, Math.min(60, Math.round(20 * Math.log10(speechPeak / Math.max(noiseFloor, 0.00005)))));
-          if (result.snrDb < 12) {
+          if (result.snrDb < 12 && !(roomNoise > 0 && noiseFloor <= roomNoise * 1.6)) {
             result.anomalies.push({ label: 'Background Noise', category: 'aq', timeSec: 0, timeLabel: '0:00', detail: `Low SNR (${result.snrDb} dB)` });
           }
         }
@@ -1981,7 +2062,7 @@ Classify "turnState" accurately into ONE of 3 states:
           }
           const ratio = fullSq > 0 ? Math.sqrt(hiSq / fullSq) : 0;
           result.sibilanceRatio = Number(ratio.toFixed(2));
-          if (ratio > 0.36 && speechPeak > 0.03) {
+          if (ratio > 0.36 && speechPeak > 0.03 && !(roomNoise > 0 && noiseFloor <= roomNoise * 1.6 && result.snrDb != null && result.snrDb < 12)) {
             result.anomalies.push({ label: 'Harsh Sibilance', category: 'aq', timeSec: Math.max(0, result.latencySec), timeLabel: formatTime(Math.floor(result.latencySec)), detail: `Sibilance (${Math.round(ratio * 100)}%)` });
           }
         } catch (_) {}
@@ -2608,6 +2689,15 @@ Classify "turnState" accurately into ONE of 3 states:
           const now = Date.now();
           const dt = now - lastTick;
           lastTick = now;
+
+          // v5: continuous ambient-noise tracking (safe: any failure keeps the previous behavior)
+          try {
+            if (now - appState.recStartTime >= 450 && rms <= Math.max(0.022, noiseFloor * 2.2)) {
+              noiseFloor = Math.min(0.05, Math.max(0.002, noiseFloor + (rms - noiseFloor) * 0.02));
+            }
+            appState.liveNoiseFloor = noiseFloor;
+            appState.liveNoiseAt = now;
+          } catch (_) {}
 
           if (now - appState.recStartTime < 450) {
             noiseFloor = Math.max(noiseFloor, rms);
@@ -3906,5 +3996,33 @@ Flagged Error Cluster: ${checkedClustersSummary}`;
       showToast('اضغط على "الإعدادات" لإدخال مفاتيح API لأول مرة');
     }
   </script>
+
+<script id="ux-improvements-js">
+(function () {
+  // sticky action row: the grid that holds the listening buttons
+  var b = document.getElementById('btn-start-listen');
+  if (b && b.parentElement) b.parentElement.classList.add('sticky-actions');
+  // compact top bar on small screens, with hysteresis to avoid flicker
+  var chrome = document.getElementById('fixed-top-chrome');
+  var bar = document.getElementById('pinned-gender-bar');
+  var wrap = document.getElementById('top-model-gender-wrap');
+  function attn() {
+    if (!bar || !wrap) return;
+    bar.classList.toggle('needs-attention', wrap.classList.contains('gender-attention') || !!wrap.querySelector('.gender-attention'));
+  }
+  if (wrap && 'MutationObserver' in window) new MutationObserver(attn).observe(wrap, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  var compact = false;
+  function onScroll() {
+    var narrow = window.matchMedia('(max-width: 639px)').matches;
+    var y = window.scrollY || 0;
+    if (!narrow) { if (compact) { compact = false; chrome.classList.remove('chrome-compact'); } return; }
+    if (!compact && y > 140) { compact = true; chrome.classList.add('chrome-compact'); }
+    else if (compact && y < 30) { compact = false; chrome.classList.remove('chrome-compact'); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  attn();
+})();
+</script>
 </body>
 </html>
