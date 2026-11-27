@@ -1669,8 +1669,11 @@ Classify "turnState" accurately into ONE of 3 states:
       return `NATURAL TONE, PRONUNCIATION & RELATIONSHIP MATCHING:
 - NEUTRAL / STANDARD TASKS: STRICTLY FORBIDDEN to use cliché or over-familiar nicknames ("يا فندم", "يا أبو الصحاب", "يا أبو حميد", "يا فنان", "يا باشمهندس", "يا هندسة", "يا كبير", "يا معلم", "يا برنس", "يا غالي", "يا سيدي", "يا صاحبي"). Start directly and naturally like speaking to someone you don't know personally ("عايز أعرف...", "لو سمحت كنت محتاج أسأل عن...", "ممكن تساعدني في...", "ممكن سؤال؟").
 - EMOTIONAL / CLOSE ROLEPLAY TASKS ONLY: Match warmth naturally when the task explicitly specifies a friend/partner/family/emotional scenario.
-- NUMBERS & CODE-SWITCHING: Spell out ALL numbers, prices, years, times, and percentages as natural spoken words in the exact user language/dialect (e.g., "مية وخمسين جنيه" not "150 جنيه", "الساعة تلاتة ونص" not "3:30"). Keep clear English tech terms/brands (API, PDF, iPhone, ChatGPT, budget, update) in Latin script with spaces before and after.
-- SURGICAL ARABIC TASHKEEL: Keep 95%+ of Arabic words clean without diacritics, adding a single vowel or Shadda (ّ) ONLY on ambiguous homographs like طَبَق vs طَبَّق, كَتَب vs كُتُب, عَلَم vs عِلْم, شَعْر vs شِعْر, حَبّ vs حُبّ, plus required feminine Kasra on "-ِك" words.`;
+- READ THE TASK CARD LANGUAGE FIRST: Before writing, take the language(s) from the task card analysis (userLanguage / userDialect for everything the user says, plus any language the task card says the user must speak, switch to, or mix, such as English, French or Arabic with English words). Write the script in exactly those language(s) and dialect; if the card asks for a second language in part of the conversation, switch only where the card says. Then apply the rules below for EACH language you actually write: Arabic gets selective diacritics and Egyptian-style spoken numbers; French keeps every accent, writes numbers in French words ("soixante-dix", "quatre-vingts", "mille deux cent"), and uses spoken contractions ("j'ai", "t'as"); English writes numbers in English words and uses natural contractions ("I'm", "don't"). A word borrowed from another language stays in its own language's standard spelling (an English word inside French or Arabic stays "meeting", never respelled French-style or in Arabic letters; a French word inside English keeps its accents). For a rare name or word a voice could misread, keep its original spelling and put a short natural lead-in before it ("اسمه", "called", "il s'appelle") so it is read as a name.
+- NUMBERS (SAY THEM THE WAY A PERSON SPEAKS): Never leave digits or symbols (%, $, #, +, =, /, ×) in the script. Write every number as spoken words in the language of the sentence it sits in, in the user's dialect: prices ("مية وخمسين جنيه"), years ("ألفين وستة وعشرين"), times ("الساعة تلاتة ونص", "تمانية إلا ربع"), dates, percentages ("خمستاشر في المية"), decimals ("اتنين فاصل خمسة", "تلاتة ونص"), ordinals ("التالت", "الخامسة"), ranges ("من خمسة لعشرة"), and units ("عشرين كيلو", "اتنين ميجا"). Make the counted noun agree the way people actually say it in the dialect ("تلات كتب", "خمس سنين", "عشر دقايق", "أربعة وعشرين ساعة" only if natural). Phone numbers, order numbers, codes and PINs are said digit by digit in small groups ("صفر واحد صفر، اتنين تلاتة أربعة..."). A number inside an English or French sentence is written as words in THAT language ("twenty twenty-six", "cent cinquante euros"), never as digits and never in the other language's words.
+- MIXED-LANGUAGE SPEECH (ARABIC + ENGLISH, FRENCH + ENGLISH, ETC.): Write like a real bilingual person talks, so the voice switches accent cleanly. Keep each language in its OWN script and correct spelling: Arabic words in Arabic letters, English words in Latin letters, French in Latin letters WITH its accents (é è ê à ù ç ô î) because they decide pronunciation. Never transliterate English or French into Arabic letters and never use Arabizi (3, 7, 5, 2 as letters). Switch at a natural boundary (a whole word, term, name or short phrase, not a random half-word), put a normal space on both sides of the switch, and do not glue Arabic prefixes onto Latin words (write "في meeting" not "فالـmeeting", "ال API" is fine as "الـ API" with spaces). Product names, brands, app names, file formats and acronyms stay in Latin ("ChatGPT", "iPhone", "PDF", "Wi-Fi"). Spell acronyms as the person says them: say-as-a-word acronyms stay as written ("NASA"), letter-by-letter ones are spaced ("A P I" only if the voice needs it; default "API"). A full sentence that is entirely in English or French is written entirely in that language with that language's punctuation. Do not invent code-switching: only mix when the speaker's dialect or the task naturally does, and never change the task's required language. Never put Arabic diacritics on Latin text or Latin accents on Arabic words.
+- SELECTIVE ARABIC DIACRITICS (LIGHT, NEVER FULL TASHKEEL): Default is clean text. Add a diacritic only where a TTS would otherwise pick the wrong word or sound, namely: (1) true homographs where context does not settle it ("طَبَق/طَبَّق", "كَتَب/كُتُب", "عَلَم/عِلْم", "شَعْر/شِعْر", "حَبّ/حُبّ", "مَدرَسة" only if unclear, "سَنة/سِنة", "دَرَس/دَرّس"), (2) verbs where the vowel or shadda changes tense or meaning ("وَصَل/وَصّل", "كَسَر/كَسّر"), (3) names, places and loanwords a voice would likely mispronounce (give just the one mark that fixes it), (4) the feminine Kasra before "ك" when addressing a female ("عندِك", "منِّك"). Hard limits: at most about one marked word in every eight to ten words, one mark (two with a shadda) per word, never mark a whole word or a whole sentence, never mark common words whose reading is obvious, and never add formal case endings (no final damma/fatha/kasra/tanween for grammar); mark the vowel inside the word only and keep the dialect's real pronunciation, not MSA. If unsure, leave the word clean.
+- SPOKEN-STYLE PUNCTUATION: Short sentences. Use commas and full stops to give natural breathing points, "..." only for a real hesitation. No markdown, bullets, emojis, parentheses, slashes, or abbreviations (write "دكتور" not "د."، "ساعة" not "س") because the voice reads them literally.`;
     }
 
     // -------------------- OFFICIAL 14 ERROR CLUSTERS TABLE & AUTO-TRACKING --------------------
@@ -2265,8 +2268,70 @@ Classify "turnState" accurately into ONE of 3 states:
     }
 
     // -------------------- ELEVENLABS TTS, AUTONOMOUS ACTIONS & STT --------------------
+    // v6: safety-net speech prep. Only runs on text that still has digits/symbols or glued scripts; any failure returns the text untouched.
+    function egyptianNumberWords(n) {
+      n = Math.floor(Number(n));
+      if (!isFinite(n) || n < 0 || n > 999999999) return null;
+      if (n === 0) return 'صفر';
+      const U = ['', 'واحد', 'اتنين', 'تلاتة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'تمانية', 'تسعة', 'عشرة', 'حداشر', 'اتناشر', 'تلاتاشر', 'أربعتاشر', 'خمستاشر', 'ستاشر', 'سبعتاشر', 'تمنتاشر', 'تسعتاشر'];
+      const T = ['', '', 'عشرين', 'تلاتين', 'أربعين', 'خمسين', 'ستين', 'سبعين', 'تمانين', 'تسعين'];
+      const H = ['', 'مية', 'ميتين', 'تلتمية', 'ربعمية', 'خمسمية', 'ستمية', 'سبعمية', 'تمنمية', 'تسعمية'];
+      const below1000 = (x) => {
+        const parts = [];
+        const h = Math.floor(x / 100), r = x % 100;
+        if (h) parts.push(H[h]);
+        if (r) {
+          if (r < 20) parts.push(U[r]);
+          else { const u = r % 10; parts.push(u ? U[u] + ' و' + T[Math.floor(r / 10)] : T[Math.floor(r / 10)]); }
+        }
+        return parts.join(' و');
+      };
+      const group = (x, one, two, few, many) => {
+        if (x === 1) return one;
+        if (x === 2) return two;
+        if (x >= 3 && x <= 10) return below1000(x) + ' ' + few;
+        return below1000(x) + ' ' + many;
+      };
+      const out = [];
+      const m = Math.floor(n / 1000000), k = Math.floor((n % 1000000) / 1000), r = n % 1000;
+      if (m) out.push(group(m, 'مليون', 'مليونين', 'ملايين', 'مليون'));
+      if (k) out.push(group(k, 'ألف', 'ألفين', 'تلاف', 'ألف').replace(/^(تلات|أربع|خمس|ست|سبع|تمان|تسع|عشر)\S* تلاف$/, (x) => x).replace('تلاتة تلاف', 'تلات تلاف').replace('أربعة تلاف', 'أربع تلاف').replace('خمسة تلاف', 'خمس تلاف').replace('ستة تلاف', 'ست تلاف').replace('سبعة تلاف', 'سبع تلاف').replace('تمانية تلاف', 'تمن تلاف').replace('تسعة تلاف', 'تسع تلاف').replace('عشرة تلاف', 'عشر تلاف'));
+      if (r) out.push(below1000(r));
+      return out.join(' و');
+    }
+
+    function prepareSpeechText(text) {
+      const original = String(text || '');
+      try {
+        const tags = [];
+        let s = original.replace(/\[[^\]]*\]/g, (m) => { tags.push(m); return '\u0001' + String.fromCharCode(96 + tags.length) + '\u0001'; });
+        // keep Arabic and Latin runs apart with a space (prefix glue like "ال" + Latin, or Latin + Arabic)
+        // Arabic diacritics never belong on Latin letters
+        s = s.replace(/([A-Za-z\u00C0-\u024F])[\u064B-\u0652\u0670]+/g, '$1');
+        s = s.replace(/([\u0600-\u06FF])([A-Za-z\u00C0-\u024F])/g, '$1 $2').replace(/([A-Za-z\u00C0-\u024F])([\u0621-\u064A])/g, '$1 $2');
+        s = s.replace(/\u0640/g, '');
+        // last-resort digit handling: only when the previous word is Arabic text
+        s = s.replace(/(^|[^\w\u0600-\u06FF])([\u0660-\u0669]+|\d+)(%?)(?![\w\u0600-\u06FF])/g, (m, pre, num, pct, off, whole) => {
+          const before = whole.slice(0, off).trimEnd();
+          const lastWord = before.split(/\s+/).pop() || '';
+          const afterWord = (whole.slice(off + m.length).trimStart().split(/\s+/)[0] || '');
+          if (lastWord ? !/[\u0600-\u06FF]/.test(lastWord) : !/[\u0600-\u06FF]/.test(afterWord)) return m;
+          const ascii = num.replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x660));
+          if (ascii.length > 9) return m;
+          const w = egyptianNumberWords(parseInt(ascii, 10));
+          if (!w) return m;
+          return pre + w + (pct ? ' في المية' : '');
+        });
+        s = s.replace(/\u0001([a-z])\u0001/g, (m, c) => tags[c.charCodeAt(0) - 97] || '');
+        return s;
+      } catch (_) {
+        return original;
+      }
+    }
+
     function cleanTextForElevenLabs(text, modelId, allowTags = true) {
       let s = String(text || '').replace(/[*_#`~>|"]/g, '').replace(/\s+/g, ' ').trim();
+      s = prepareSpeechText(s);
       if (!allowTags || !/v3|v4/i.test(modelId || '')) {
         s = s.replace(/\[[^\]]{1,28}\]/g, '').replace(/\s+/g, ' ').trim();
       }
