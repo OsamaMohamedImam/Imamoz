@@ -203,7 +203,38 @@ button:hover:not(:disabled) svg:not(.stage-chevron){transform:scale(1.1) rotate(
 .scroll-reveal:not(.in-view){animation:oFailsafe .45s var(--e) .7s forwards}
 @keyframes oFailsafe{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.scroll-reveal{opacity:1;transform:none}}
-</style></head>
+</style><style id="v10-liquid-glass">
+:root{--lg-edge:rgba(255,255,255,.18);--lg-fill:rgba(255,255,255,.07);--lg-spring:cubic-bezier(.34,1.45,.5,1)}
+body{background:radial-gradient(720px 520px at 12% 0%,rgba(56,189,248,.30),transparent 62%),radial-gradient(640px 520px at 95% 18%,rgba(129,140,248,.26),transparent 62%),radial-gradient(600px 480px at 50% 105%,rgba(251,146,60,.14),transparent 60%),#050B1A}
+/* glass surfaces (blur kept small: 8px, only on large containers) */
+html body .stage-card,html body #live-status-hud{background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.04))!important;border:1px solid var(--lg-edge)!important;border-radius:22px!important;-webkit-backdrop-filter:blur(8px) saturate(1.3);backdrop-filter:blur(8px) saturate(1.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 0 0 .5px rgba(255,255,255,.06),0 14px 34px -18px rgba(0,0,0,.65)!important}
+html body #live-status-hud{border-radius:0!important}
+html body [class*="bg-studio-9"],html body [class*="bg-studio-8"]{background-color:rgba(255,255,255,.055)!important;border-color:var(--lg-edge)!important}
+html body [class*="rounded-2xl"],html body [class*="rounded-xl"]{border-color:var(--lg-edge)}
+html body textarea,html body input:not([type=checkbox]):not([type=radio]),html body select{border-radius:14px!important;background-color:rgba(255,255,255,.06)!important;box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
+/* buttons: soft glass capsules */
+html body button{background-color:var(--lg-fill)!important;background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0) 60%)!important;border:1px solid var(--lg-edge)!important;border-radius:14px!important;color:#e8f1ff;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(255,255,255,.05),0 6px 16px -10px rgba(0,0,0,.6)!important;transition:transform .2s var(--lg-spring),background-color .25s,box-shadow .25s,border-color .25s,color .25s!important;text-shadow:none}
+html body button:hover:not(:disabled){background-color:rgba(255,255,255,.13)!important;border-color:rgba(255,255,255,.3)!important;transform:none;filter:none}
+html body button:active:not(:disabled){transform:scale(.965)!important}
+html body button:disabled{opacity:.45}
+html body button.bg-teal-500,html body button.bg-indigo-500{background-color:rgba(14,165,233,.38)!important;background-image:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.02) 65%)!important;color:#fff!important;border-color:rgba(186,230,253,.55)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 10px 24px -12px rgba(56,189,248,.8)!important}
+html body button.bg-indigo-500{background-color:rgba(99,102,241,.42)!important;border-color:rgba(199,210,254,.5)!important}
+html body button[class*="bg-rose-500"],html body button[class*="bg-amber-400"],html body button[class*="bg-slate-200"]{background-image:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,.02) 65%)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 8px 18px -12px rgba(0,0,0,.6)!important}
+html body button.bg-slate-200{color:#0b1220!important}
+html body button[class*="bg-amber-400"]{color:#1f1300!important}
+/* segmented groups: container is the glass track, a liquid pill (::before) slides behind the active key */
+html body .lg-seg{position:relative;border-radius:999px!important;background-color:rgba(255,255,255,.06)!important;border:1px solid var(--lg-edge)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 1px 2px rgba(0,0,0,.35),inset 0 -1px 0 rgba(255,255,255,.08)}
+.lg-seg::before{content:"";position:absolute;left:0;top:0;width:var(--lg-w,0px);height:var(--lg-h,0px);transform:translate(var(--lg-x,0px),var(--lg-y,0px));border-radius:999px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.50),rgba(125,211,252,.26) 50%,rgba(56,189,248,.34));border:1px solid rgba(255,255,255,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 6px 16px -6px rgba(56,189,248,.7);
+  opacity:0;transition:transform .5s var(--lg-spring),width .5s var(--lg-spring),height .5s var(--lg-spring),opacity .2s}
+.lg-seg[data-lg]::before{opacity:1}
+html body .lg-seg>button[class]{position:relative;z-index:1;border-radius:999px!important;background-color:transparent!important;background-image:none!important;border-color:transparent!important;box-shadow:none!important;color:#a9bbd6!important;font-weight:600}
+html body .lg-seg>button.lg-on[class]{color:#fff!important;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+html body .lg-seg>button[class]:hover:not(:disabled):not(.lg-on){background-color:rgba(255,255,255,.08)!important}
+html body .lg-seg>button[class]:active:not(:disabled){transform:scale(.95)!important}
+@media (prefers-reduced-motion:reduce){html body button,.lg-seg,.lg-seg::before{transition:none!important}html body button:active:not(:disabled){transform:none!important}}
+</style>
+</head>
 <body class="min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-teal-500/30 selection:text-teal-100">
 
   <!-- Toast Notification -->
@@ -4143,6 +4174,43 @@ Flagged Error Cluster: ${checkedClustersSummary}`;
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
   attn();
+})();
+</script>
+<script id="v10-liquid-glass-js">
+/* v10: positions the sliding glass pill behind the active key of each segmented group. Reads classes only; changes nothing else. */
+(function(){
+  var ACTIVE=/(^|\s)bg-teal-500(\/\d+)?(\s|$)/;
+  function isActive(b){return ACTIVE.test(b.className)}
+  var known=new Set();
+  function scan(){
+    document.querySelectorAll('button').forEach(function(b){
+      var p=b.parentElement;
+      if(!p||known.has(p)||b.classList.contains('rate-btn'))return;
+      if(!/(^|\s)(p-1|p-0\.5|grid-cols-3)(\s|$)/.test(p.className))return;
+      var kids=Array.prototype.filter.call(p.children,function(c){return c.tagName==='BUTTON'});
+      if(kids.length<2||kids.length!==p.children.length)return;
+      if(!kids.some(isActive))return;
+      known.add(p);p.classList.add('lg-seg');
+    });
+  }
+  function place(p){
+    var kids=Array.prototype.filter.call(p.children,function(c){return c.tagName==='BUTTON'});
+    var a=kids.filter(isActive)[0];
+    kids.forEach(function(k){var on=(k===a);if(k.classList.contains('lg-on')!==on)k.classList.toggle('lg-on',on)});
+    if(!a||!a.offsetWidth)return;
+    var cs=getComputedStyle(p),bl=parseFloat(cs.borderLeftWidth)||0,bt=parseFloat(cs.borderTopWidth)||0;
+    var v=[(a.offsetLeft-bl)+'px',(a.offsetTop-bt)+'px',a.offsetWidth+'px',a.offsetHeight+'px'].join(',');
+    if(p.getAttribute('data-lg')!==v){
+      p.setAttribute('data-lg',v);
+      p.style.setProperty('--lg-x',(a.offsetLeft-bl)+'px');
+      p.style.setProperty('--lg-y',(a.offsetTop-bt)+'px');
+      p.style.setProperty('--lg-w',a.offsetWidth+'px');
+      p.style.setProperty('--lg-h',a.offsetHeight+'px');
+    }
+  }
+  function tick(){scan();known.forEach(function(p){if(!p.isConnected){known.delete(p);return}place(p)})}
+  function start(){tick();setInterval(tick,200);document.addEventListener('click',function(){setTimeout(tick,0);setTimeout(tick,120)},true);window.addEventListener('resize',tick)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
 </script>
 </body>
